@@ -3,7 +3,8 @@
 
 int main()
 {
-  if (SDL_Init(SDL_INIT_VIDEO | SDL_INIT_EVENTS | SDL_INIT_TIMER) != 0) {
+  if (SDL_Init(SDL_INIT_VIDEO | SDL_INIT_EVENTS | SDL_INIT_TIMER) != 0)
+  {
     SDL_Log("Unable to initialize SDL: %s", SDL_GetError());
     return 1;
   }
@@ -12,7 +13,8 @@ int main()
 
   window = SDL_CreateWindow("CppGameTest", SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED, 1024, 768, SDL_WINDOW_VULKAN);
 
-  if (window == NULL) {
+  if (window == NULL)
+  {
     SDL_Log("Unable to create window: %s", SDL_GetError());
     return 1;
   }
