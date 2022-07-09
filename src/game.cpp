@@ -1,12 +1,17 @@
+#include <algorithm>
+
 #include "game.hpp"
 
-class Transform {
-};
+Entity& EntityStore::create() {
+  Entity entity;
+  entity.id = idCounter;
+  entity.name = "Entity";
+  idCounter += 1;
 
-class Entity {
+  entityList.emplace_back(std::move(entity));
+  return entityList.back();
+}
 
-};
-
-class EntityStore {
-
-};
+void EntityStore::remove(Entity& entity) {
+  entityList.remove(entity);
+}
