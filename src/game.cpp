@@ -15,3 +15,15 @@ Entity& EntityStore::create() {
 void EntityStore::remove(Entity& entity) {
   entityList.remove(entity);
 }
+
+std::list<Entity>::iterator EntityStore::begin() {
+  return this->entityList.begin();
+}
+
+std::list<Entity>::iterator EntityStore::end() {
+  return this->entityList.end();
+}
+
+inline bool Entity::operator==(Entity& entity) const {
+  return this->id == entity.id;
+}

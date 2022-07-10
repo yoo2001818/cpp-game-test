@@ -19,6 +19,8 @@ class Entity {
     EntityId id;
     Transform transform;
     std::string name;
+    
+    inline bool operator==(Entity& entity) const;
 };
 
 class EntityStore {
@@ -29,6 +31,8 @@ class EntityStore {
     
     Entity& create();
     void remove(Entity& entity);
+    std::list<Entity>::iterator begin();
+    std::list<Entity>::iterator end();
 };
 
 #endif // GAME_HPP_

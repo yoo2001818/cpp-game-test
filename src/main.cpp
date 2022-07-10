@@ -1,5 +1,7 @@
 #include <SDL2/SDL.h>
 #include <SDL2/SDL_video.h>
+#include <iostream>
+#include "game.hpp"
 
 int main()
 {
@@ -17,6 +19,17 @@ int main()
   {
     SDL_Log("Unable to create window: %s", SDL_GetError());
     return 1;
+  }
+
+  EntityStore entityStore;
+  Entity& entity = entityStore.create();
+  entity.name = "A Test";
+
+  Entity& entity2 = entityStore.create();
+  Entity& entity3 = entityStore.create();
+
+  for (Entity& e : entityStore) {
+    std::cout << e.id << " - " << e.name << std::endl;
   }
 
   SDL_Delay(3000);
