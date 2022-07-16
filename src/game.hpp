@@ -3,6 +3,7 @@
 
 #include <list>
 #include <string>
+#include <memory>
 #include <glm/glm.hpp>
 #include <glm/gtx/quaternion.hpp>
 
@@ -27,12 +28,12 @@ class EntityStore {
   private:
     EntityId idCounter = 0;
   public:
-    std::list<Entity> entityList {};
+    std::list<std::unique_ptr<Entity>> entityList {};
     
-    Entity& create();
-    void remove(Entity& entity);
-    std::list<Entity>::iterator begin();
-    std::list<Entity>::iterator end();
+    std::unique_ptr<Entity>& create();
+    void remove(std::unique_ptr<Entity>& entity);
+    std::list<std::unique_ptr<Entity>>::iterator begin();
+    std::list<std::unique_ptr<Entity>>::iterator end();
 };
 
 #endif // GAME_HPP_

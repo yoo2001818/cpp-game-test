@@ -2,25 +2,25 @@
 
 #include "game.hpp"
 
-Entity& EntityStore::create() {
-  Entity entity;
-  entity.id = idCounter;
-  entity.name = "Entity";
+std::unique_ptr<Entity>& EntityStore::create() {
+  std::unique_ptr<Entity> entity = std::make_unique<Entity>();
+  entity->id = idCounter;
+  entity->name = "Entity";
   idCounter += 1;
 
   entityList.emplace_back(std::move(entity));
   return entityList.back();
 }
 
-void EntityStore::remove(Entity& entity) {
+void EntityStore::remove(std::unique_ptr<Entity>& entity) {
   entityList.remove(entity);
 }
 
-std::list<Entity>::iterator EntityStore::begin() {
+std::list<std::unique_ptr<Entity>>::iterator EntityStore::begin() {
   return this->entityList.begin();
 }
 
-std::list<Entity>::iterator EntityStore::end() {
+std::list<std::unique_ptr<Entity>>::iterator EntityStore::end() {
   return this->entityList.end();
 }
 
