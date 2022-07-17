@@ -2,8 +2,8 @@
 
 #include "game.hpp"
 
-std::unique_ptr<Entity>& EntityStore::create() {
-  std::unique_ptr<Entity> entity = std::make_unique<Entity>();
+std::shared_ptr<Entity>& EntityStore::create() {
+  std::shared_ptr<Entity> entity = std::make_shared<Entity>();
   entity->id = idCounter;
   entity->name = "Entity";
   idCounter += 1;
@@ -12,15 +12,15 @@ std::unique_ptr<Entity>& EntityStore::create() {
   return entityList.back();
 }
 
-void EntityStore::remove(std::unique_ptr<Entity>& entity) {
+void EntityStore::remove(std::shared_ptr<Entity>& entity) {
   entityList.remove(entity);
 }
 
-std::list<std::unique_ptr<Entity>>::iterator EntityStore::begin() {
+std::list<std::shared_ptr<Entity>>::iterator EntityStore::begin() {
   return this->entityList.begin();
 }
 
-std::list<std::unique_ptr<Entity>>::iterator EntityStore::end() {
+std::list<std::shared_ptr<Entity>>::iterator EntityStore::end() {
   return this->entityList.end();
 }
 

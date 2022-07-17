@@ -28,12 +28,12 @@ class EntityStore {
   private:
     EntityId idCounter = 0;
   public:
-    std::list<std::unique_ptr<Entity>> entityList {};
+    std::list<std::shared_ptr<Entity>> entityList {};
     
-    std::unique_ptr<Entity>& create();
-    void remove(std::unique_ptr<Entity>& entity);
-    std::list<std::unique_ptr<Entity>>::iterator begin();
-    std::list<std::unique_ptr<Entity>>::iterator end();
+    std::shared_ptr<Entity>& create();
+    void remove(std::shared_ptr<Entity>& entity);
+    std::list<std::shared_ptr<Entity>>::iterator begin();
+    std::list<std::shared_ptr<Entity>>::iterator end();
 };
 
 #endif // GAME_HPP_

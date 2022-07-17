@@ -22,14 +22,14 @@ int main()
   }
 
   EntityStore entityStore;
-  Entity& entity = entityStore.create();
-  entity.name = "A Test";
+  auto entity = entityStore.create();
+  entity->name = "A Test";
 
-  Entity& entity2 = entityStore.create();
-  Entity& entity3 = entityStore.create();
+  auto entity2 = entityStore.create();
+  auto entity3 = entityStore.create();
 
-  for (Entity& e : entityStore) {
-    std::cout << e.id << " - " << e.name << std::endl;
+  for (auto e : entityStore) {
+    std::cout << e->id << " - " << e->name << std::endl;
   }
 
   SDL_Delay(3000);
