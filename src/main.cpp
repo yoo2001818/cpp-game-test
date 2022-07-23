@@ -15,9 +15,17 @@ int main()
 
   window = SDL_CreateWindow("CppGameTest", SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED, 1024, 768, SDL_WINDOW_VULKAN);
 
-  if (window == NULL)
+  if (window == nullptr)
   {
     SDL_Log("Unable to create window: %s", SDL_GetError());
+    return 1;
+  }
+
+  SDL_Renderer *renderer = SDL_CreateRenderer(window, -1, SDL_RENDERER_ACCELERATED);
+  
+  if (renderer == nullptr)
+  {
+    SDL_Log("Unable to create renderer: %s", SDL_GetError());
     return 1;
   }
 
@@ -32,8 +40,24 @@ int main()
     std::cout << e->id << " - " << e->name << std::endl;
   }
 
-  SDL_Delay(3000);
+  while (true)
+  {
+    SDL_Event event;
+    if (SDL_PollEvent(&event))
+    {
+      if (event.type == SDL_QUIT)
+      {
+        break;
+      }
+    }
 
+    SDL_SetRenderDrawColor(renderer, 255, 255, 255, 255);
+
+    SDL_RenderClear(renderer);
+    SDL_RenderPresent(renderer);
+  }
+
+  SDL_DestroyRenderer(renderer);
   SDL_DestroyWindow(window);
 
   SDL_Quit();
