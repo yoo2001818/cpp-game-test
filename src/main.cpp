@@ -54,7 +54,25 @@ int main()
     SDL_SetRenderDrawColor(renderer, 255, 255, 255, 255);
 
     SDL_RenderClear(renderer);
+
+    for (auto e : entityStore) {
+      e->transform.position.x += 1.0;
+      e->transform.position.y += 1.0;
+    }
+
+    for (auto e : entityStore) {
+      SDL_Rect rect;
+      rect.x = e->transform.position.x;
+      rect.y = e->transform.position.y;
+      rect.w = 5;
+      rect.h = 5;
+      SDL_SetRenderDrawColor(renderer, 255, 0, 0, 255);
+      SDL_RenderFillRect(renderer, &rect);
+    }
+
     SDL_RenderPresent(renderer);
+
+    SDL_Delay(12);
   }
 
   SDL_DestroyRenderer(renderer);
