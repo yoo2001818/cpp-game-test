@@ -30,6 +30,7 @@ int main()
   }
 
   EntityStore entityStore;
+  /*
   auto entity = entityStore.create();
   entity->name = "A Test";
 
@@ -39,6 +40,7 @@ int main()
   for (auto e : entityStore) {
     std::cout << e->id << " - " << e->name << std::endl;
   }
+  */
 
   while (true)
   {
@@ -54,6 +56,15 @@ int main()
     SDL_SetRenderDrawColor(renderer, 255, 255, 255, 255);
 
     SDL_RenderClear(renderer);
+
+    int windowWidth, windowHeight;
+    SDL_GetRendererOutputSize(renderer, &windowHeight, &windowHeight);
+
+    for (int i = 0; i < 10; i += 1) {
+      auto entity = entityStore.create();
+      entity->transform.position.x = windowWidth / 2;
+      entity->transform.position.y = windowHeight / 2;
+    }
 
     for (auto e : entityStore) {
       e->transform.position.x += 1.0;
