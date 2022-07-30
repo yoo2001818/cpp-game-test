@@ -1,10 +1,14 @@
 #include <SDL2/SDL.h>
 #include <SDL2/SDL_video.h>
+#include <cstdlib>
+#include <ctime>
 #include <iostream>
 #include "game.hpp"
 
 int main()
 {
+  std::srand(std::time(nullptr));
+
   if (SDL_Init(SDL_INIT_VIDEO | SDL_INIT_EVENTS | SDL_INIT_TIMER) != 0)
   {
     SDL_Log("Unable to initialize SDL: %s", SDL_GetError());
@@ -58,17 +62,31 @@ int main()
     SDL_RenderClear(renderer);
 
     int windowWidth, windowHeight;
-    SDL_GetRendererOutputSize(renderer, &windowHeight, &windowHeight);
+    SDL_GetRendererOutputSize(renderer, &windowWidth, &windowHeight);
 
     for (int i = 0; i < 10; i += 1) {
       auto entity = entityStore.create();
       entity->transform.position.x = windowWidth / 2;
       entity->transform.position.y = windowHeight / 2;
+      entity->velocity.x = static_cast<float>(rand()) / static_cast<float>(RAND_MAX) * 2.0 - 1.0;
+      entity->velocity.y = static_cast<float>(rand()) / static_cast<float>(RAND_MAX) * 2.0 - 1.0;
+      entity->velocity = glm::normalize(entity->velocity);
     }
 
-    for (auto e : entityStore) {
-      e->transform.position.x += 1.0;
-      e->transform.position.y += 1.0;
+    for (auto i = entityStore.begin(); i != entityStore.end(); ++i) {
+      auto e = *i;
+      e->transform.position.x += e->velocity.x * 2.0;
+      e->transform.position.y += e->velocity.y * 2.0;
+
+      if (
+        e->transform.position.x < 0.0 ||
+        e->transform.position.x > windowWidth ||
+        e->transform.position.y < 0.0 ||
+        e->transform.position.y > windowHeight
+      ) {
+        i ++;
+        entityStore.remove(e);
+      }
     }
 
     for (auto e : entityStore) {

@@ -19,6 +19,7 @@ class Entity {
   public:
     EntityId id;
     Transform transform;
+    glm::vec3 velocity {0., 0., 0.};
     std::string name;
     
     inline bool operator==(Entity& entity) const;
