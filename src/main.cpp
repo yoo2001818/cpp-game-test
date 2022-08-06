@@ -57,6 +57,8 @@ int main()
       }
     }
 
+    uint64_t beginTime = SDL_GetTicks64();
+
     SDL_SetRenderDrawColor(renderer, 255, 255, 255, 255);
 
     SDL_RenderClear(renderer);
@@ -101,7 +103,13 @@ int main()
 
     SDL_RenderPresent(renderer);
 
-    SDL_Delay(12);
+    uint64_t endTime = SDL_GetTicks64();
+    int32_t deltaTime = static_cast<int32_t>(endTime - beginTime);
+    int32_t sleepTime = 12 - deltaTime;
+
+    if (sleepTime > 0) {
+      SDL_Delay(sleepTime);
+    }
   }
 
   SDL_DestroyRenderer(renderer);
