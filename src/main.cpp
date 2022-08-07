@@ -33,15 +33,15 @@ int main()
     return 1;
   }
 
-  EntityStore entityStore;
+  World world;
   /*
-  auto entity = entityStore.create();
+  auto entity = world.create();
   entity->name = "A Test";
 
-  auto entity2 = entityStore.create();
-  auto entity3 = entityStore.create();
+  auto entity2 = world.create();
+  auto entity3 = world.create();
 
-  for (auto e : entityStore) {
+  for (auto e : world) {
     std::cout << e->id << " - " << e->name << std::endl;
   }
   */
@@ -67,7 +67,7 @@ int main()
     SDL_GetRendererOutputSize(renderer, &windowWidth, &windowHeight);
 
     for (int i = 0; i < 10; i += 1) {
-      auto entity = entityStore.create();
+      auto entity = world.create();
       entity->transform.position.x = windowWidth / 2;
       entity->transform.position.y = windowHeight / 2;
       entity->velocity.x = static_cast<float>(rand()) / static_cast<float>(RAND_MAX) * 2.0 - 1.0;
@@ -75,7 +75,7 @@ int main()
       entity->velocity = glm::normalize(entity->velocity);
     }
 
-    for (auto i = entityStore.begin(); i != entityStore.end(); ++i) {
+    for (auto i = world.begin(); i != world.end(); ++i) {
       auto e = *i;
       e->transform.position.x += e->velocity.x * 2.0;
       e->transform.position.y += e->velocity.y * 2.0;
@@ -87,11 +87,11 @@ int main()
         e->transform.position.y > windowHeight
       ) {
         i ++;
-        entityStore.remove(e);
+        world.remove(e);
       }
     }
 
-    for (auto e : entityStore) {
+    for (auto e : world) {
       SDL_Rect rect;
       rect.x = e->transform.position.x;
       rect.y = e->transform.position.y;

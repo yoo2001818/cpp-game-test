@@ -14,6 +14,7 @@ struct Transform {
 };
 
 typedef int EntityId;
+typedef int TileId;
 
 class Entity {
   public:
@@ -25,7 +26,17 @@ class Entity {
     inline bool operator==(Entity& entity) const;
 };
 
-class EntityStore {
+class Tile {
+  public:
+    TileId tileId;
+};
+
+class TileMap {
+  private:
+    std::vector<std::vector<Tile>> tiles;
+};
+
+class World {
   private:
     EntityId idCounter = 0;
   public:

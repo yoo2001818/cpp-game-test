@@ -2,7 +2,7 @@
 
 #include "game.hpp"
 
-std::shared_ptr<Entity>& EntityStore::create() {
+std::shared_ptr<Entity>& World::create() {
   std::shared_ptr<Entity> entity = std::make_shared<Entity>();
   entity->id = idCounter;
   entity->name = "Entity";
@@ -12,15 +12,15 @@ std::shared_ptr<Entity>& EntityStore::create() {
   return entityList.back();
 }
 
-void EntityStore::remove(std::shared_ptr<Entity>& entity) {
+void World::remove(std::shared_ptr<Entity>& entity) {
   entityList.remove(entity);
 }
 
-std::list<std::shared_ptr<Entity>>::iterator EntityStore::begin() {
+std::list<std::shared_ptr<Entity>>::iterator World::begin() {
   return this->entityList.begin();
 }
 
-std::list<std::shared_ptr<Entity>>::iterator EntityStore::end() {
+std::list<std::shared_ptr<Entity>>::iterator World::end() {
   return this->entityList.end();
 }
 
