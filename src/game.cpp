@@ -1,5 +1,4 @@
 #include <algorithm>
-
 #include "game.hpp"
 
 std::shared_ptr<Entity>& World::create() {
