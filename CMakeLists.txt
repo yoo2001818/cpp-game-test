@@ -8,13 +8,30 @@ set(CMAKE_CXX_STANDARD_REQUIRED True)
 find_package(Vulkan REQUIRED)
 find_package(SDL2 REQUIRED)
 find_package(glm REQUIRED)
+include(FetchContent)
+
+FetchContent_Declare(
+  Catch2
+  GIT_REPOSITORY https://github.com/catchorg/Catch2.git
+  GIT_TAG        v3.0.1
+)
+
+FetchContent_MakeAvailable(Catch2)
 
 include_directories(${VULKAN_INCLUDE_DIRS})
 include_directories(${SDL2_INCLUDE_DIRS})
 include_directories(${GLM_INCLUDE_DIRS})
 
-link_libraries(${SDL2_LIBRARIES})
-
 include_directories(${PROJECT_SOURCE_DIR}/src)
 file(GLOB SOURCES ${PROJECT_SOURCE_DIR}/src/*.cpp)
 add_executable(CppGameTest ${SOURCES})
+target_link_libraries(CppGameTest ${SDL2_LIBRARIES})
+
+list(REMOVE_ITEM SOURCES ${PROJECT_SOURCE_DIR}/src/main.cpp)
+add_executable(CppGameTestTest ${SOURCES})
+target_link_libraries(CppGameTestTest ${SDL2_LIBRARIES})
+target_link_libraries(CppGameTestTest Catch2::Catch2WithMain)
+
+include(CTest)
+include(Catch)
+catch_discover_tests(CppGameTestTest)

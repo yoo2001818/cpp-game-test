@@ -4,6 +4,7 @@
 #include <list>
 #include <string>
 #include <memory>
+#include <vector>
 #include <glm/glm.hpp>
 #include <glm/gtx/quaternion.hpp>
 

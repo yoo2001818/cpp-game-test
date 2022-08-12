@@ -10,4 +10,8 @@ compile_commands.json
 CTestTestfile.cmake
 _deps
 /CppGameTest
+/CppGameTestTest
 build/
+generated-includes/
+*.cmake
+DartConfiguration.tcl
