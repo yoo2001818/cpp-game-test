@@ -28,6 +28,8 @@ add_executable(CppGameTest ${SOURCES})
 target_link_libraries(CppGameTest ${SDL2_LIBRARIES})
 
 file(GLOB TEST_SOURCES ${PROJECT_SOURCE_DIR}/test/*.cpp)
+list(APPEND TEST_SOURCES ${SOURCES})
+list(REMOVE_ITEM TEST_SOURCES ${PROJECT_SOURCE_DIR}/src/main.cpp)
 add_executable(CppGameTestTest ${TEST_SOURCES})
 target_link_libraries(CppGameTestTest ${SDL2_LIBRARIES})
 target_link_libraries(CppGameTestTest Catch2::Catch2WithMain)
