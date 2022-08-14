@@ -1,7 +1,6 @@
-#include <optional>
 #include <map>
 #include <typeindex>
-#include <memory>
+#include <any>
 #include <glm/glm.hpp>
 #include <glm/gtx/quaternion.hpp>
 
@@ -11,43 +10,26 @@ struct transform {
   alignas(16) glm::quat rotation {0., 0., 0., 1.};
 };
 
-class entity_component_handle_base {
-  public:
-  virtual ~entity_component_handle_base() {};
-};
-
-template <typename T>
-class entity_component_handle : public entity_component_handle_base {
-  public:
-  entity_component_handle(T pValue) {
-    this->mValue = std::make_unique<T>(pValue);
-  };
-  entity_component_handle(std::unique_ptr<T>&& pValue): mValue(pValue) {};
-
-  virtual ~entity_component_handle() {};
-
-  private:
-  std::unique_ptr<T> mValue;
-};
-
 class entity {
   public:
-  template<class T> std::optional<T> get() {
+  template<class T> T* get() {
     std::type_index type_index(typeid(T));
     auto it = this->mComponentMap.find(type_index);
     if (it == this->mComponentMap.end()) {
-      return std::nullopt;
+      return nullptr;
     }
-    entity_component_handle<T>& handle =
-      static_cast<entity_component_handle<T>&>(it->second);
-    return *(handle->mValue);
+    return &std::any_cast<T&>(it->second);
   };
-  template<class T> void set(T value) {
+  template<class T> T& set(const T& value) {
     std::type_index type_index(typeid(T));
-    entity_component_handle<T> handle(value);
-    this->mComponentMap.emplace(std::pair(
+    auto [it, is_created] = this->mComponentMap.emplace(std::pair(
       type_index,
-      static_cast<entity_component_handle_base>(handle)));
+      std::make_any<T>(value)));
+    if (!is_created) {
+      std::any& handle = it->second;
+      handle.emplace<T>(value);
+    }
+    return std::any_cast<T&>(it->second);
   };
   template<class T> void remove() {
     std::type_index type_index(typeid(T));
@@ -59,5 +41,5 @@ class entity {
   };
 
   private:
-  std::map<std::type_index, entity_component_handle_base> mComponentMap;
+  std::map<std::type_index, std::any> mComponentMap;
 };
