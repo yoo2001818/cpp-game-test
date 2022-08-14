@@ -1,17 +1,16 @@
+#ifndef ENTITY_HPP_
+#define ENTITY_HPP_
+
 #include <map>
 #include <typeindex>
 #include <any>
-#include <glm/glm.hpp>
-#include <glm/gtx/quaternion.hpp>
-
-struct transform {
-  alignas(16) glm::vec3 position {0., 0., 0.};
-  alignas(16) glm::vec3 scale {1., 1., 1.};
-  alignas(16) glm::quat rotation {0., 0., 0., 1.};
-};
 
 class entity {
   public:
+  entity(): mComponentMap() {};
+  entity(entity&& pEntity): mComponentMap(std::move(pEntity.mComponentMap)) {};
+  entity(const entity& pEntity): mComponentMap(pEntity.mComponentMap) {};
+
   template<class T> T* get() {
     std::type_index type_index(typeid(T));
     auto it = this->mComponentMap.find(type_index);
@@ -43,3 +42,5 @@ class entity {
   private:
   std::map<std::type_index, std::any> mComponentMap;
 };
+
+#endif // ENTITY_HPP_

@@ -2,6 +2,7 @@
 #include <iostream>
 
 #include "entity.hpp"
+#include "transform.hpp"
 
 TEST_CASE("Entity stores an object", "[entity]") {
   entity entity;
