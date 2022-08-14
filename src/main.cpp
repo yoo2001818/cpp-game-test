@@ -33,32 +33,34 @@ int main()
     return 1;
   }
 
-  game game(renderer);
-  game.init();
-
-  while (true)
   {
-    SDL_Event event;
-    if (SDL_PollEvent(&event))
+    game game(renderer);
+    game.init();
+
+    while (true)
     {
-      if (event.type == SDL_QUIT)
+      SDL_Event event;
+      if (SDL_PollEvent(&event))
       {
-        break;
+        if (event.type == SDL_QUIT)
+        {
+          break;
+        }
+        game.handleEvent(event);
       }
-      game.handleEvent(event);
-    }
 
-    uint64_t beginTime = SDL_GetTicks64();
+      uint64_t beginTime = SDL_GetTicks64();
 
-    game.update();
-    game.render();
+      game.update();
+      game.render();
 
-    uint64_t endTime = SDL_GetTicks64();
-    int32_t deltaTime = static_cast<int32_t>(endTime - beginTime);
-    int32_t sleepTime = 12 - deltaTime;
+      uint64_t endTime = SDL_GetTicks64();
+      int32_t deltaTime = static_cast<int32_t>(endTime - beginTime);
+      int32_t sleepTime = 12 - deltaTime;
 
-    if (sleepTime > 0) {
-      SDL_Delay(sleepTime);
+      if (sleepTime > 0) {
+        SDL_Delay(sleepTime);
+      }
     }
   }
 

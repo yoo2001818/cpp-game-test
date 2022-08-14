@@ -16,8 +16,7 @@ std::shared_ptr<entity> world::add(entity&& pEntity) {
 void world::remove(const std::shared_ptr<entity>& entity) {
   for (auto it = this->begin(); it != this->end(); it++) {
     if (*it == entity) {
-      it++;
-      this->mEntityList.erase(it);
+      it = this->mEntityList.erase(it);
     }
   }
 }

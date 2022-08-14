@@ -4,7 +4,6 @@
 #include "velocity.hpp"
 
 void game::init() {
-
 }
 
 void game::update() {
@@ -13,16 +12,16 @@ void game::update() {
 
   for (int i = 0; i < 10; i += 1) {
     auto entity = mWorld.create();
-    auto transform_val = entity->set<transform>();
+    auto& transform_val = entity->set<transform>();
     transform_val.position.x = windowWidth / 2;
     transform_val.position.y = windowHeight / 2;
-    auto velocity_val = entity->set<velocity>();
+    auto& velocity_val = entity->set<velocity>();
     velocity_val.value.x = static_cast<float>(rand()) / static_cast<float>(RAND_MAX) * 2.0 - 1.0;
     velocity_val.value.y = static_cast<float>(rand()) / static_cast<float>(RAND_MAX) * 2.0 - 1.0;
     velocity_val.value = glm::normalize(velocity_val.value);
   }
 
-  for (auto i = mWorld.begin(); i != mWorld.end(); ++i) {
+  for (auto i = mWorld.begin(); i != mWorld.end();) {
     auto entity = *i;
     auto transform_val = entity->get<transform>();
     auto velocity_val = entity->get<velocity>();
@@ -38,8 +37,9 @@ void game::update() {
       transform_val->position.y < 0.0 ||
       transform_val->position.y > windowHeight
     ) {
+      i = mWorld.mEntityList.erase(i);
+    } else {
       i ++;
-      mWorld.remove(entity);
     }
   }
 }
