@@ -1,6 +1,11 @@
 #include <algorithm>
 #include "world.hpp"
 
+std::shared_ptr<entity> world::create() {
+  entity entity;
+  return world::add(std::move(entity));
+}
+
 std::shared_ptr<entity> world::add(entity&& pEntity) {
   std::shared_ptr<entity> entity_val = std::make_shared<entity>(pEntity);
   

@@ -1,28 +1,74 @@
-#include <algorithm>
 #include "game.hpp"
+#include "entity.hpp"
+#include "transform.hpp"
+#include "velocity.hpp"
 
-std::shared_ptr<Entity>& World::create() {
-  std::shared_ptr<Entity> entity = std::make_shared<Entity>();
-  entity->id = idCounter;
-  entity->name = "Entity";
-  idCounter += 1;
+void game::init() {
 
-  entityList.emplace_back(std::move(entity));
-  return entityList.back();
 }
 
-void World::remove(std::shared_ptr<Entity>& entity) {
-  entityList.remove(entity);
+void game::update() {
+  int windowWidth, windowHeight;
+  SDL_GetRendererOutputSize(mRenderer, &windowWidth, &windowHeight);
+
+  for (int i = 0; i < 10; i += 1) {
+    auto entity = mWorld.create();
+    auto transform_val = entity->set<transform>();
+    transform_val.position.x = windowWidth / 2;
+    transform_val.position.y = windowHeight / 2;
+    auto velocity_val = entity->set<velocity>();
+    velocity_val.value.x = static_cast<float>(rand()) / static_cast<float>(RAND_MAX) * 2.0 - 1.0;
+    velocity_val.value.y = static_cast<float>(rand()) / static_cast<float>(RAND_MAX) * 2.0 - 1.0;
+    velocity_val.value = glm::normalize(velocity_val.value);
+  }
+
+  for (auto i = mWorld.begin(); i != mWorld.end(); ++i) {
+    auto entity = *i;
+    auto transform_val = entity->get<transform>();
+    auto velocity_val = entity->get<velocity>();
+    if (transform_val == nullptr || velocity_val == nullptr) {
+      continue;
+    }
+    transform_val->position.x += velocity_val->value.x * 2.0;
+    transform_val->position.y += velocity_val->value.y * 2.0;
+
+    if (
+      transform_val->position.x < 0.0 ||
+      transform_val->position.x > windowWidth ||
+      transform_val->position.y < 0.0 ||
+      transform_val->position.y > windowHeight
+    ) {
+      i ++;
+      mWorld.remove(entity);
+    }
+  }
 }
 
-std::list<std::shared_ptr<Entity>>::iterator World::begin() {
-  return this->entityList.begin();
+void game::render() {
+  SDL_SetRenderDrawColor(mRenderer, 255, 255, 255, 255);
+
+  SDL_RenderClear(mRenderer);
+
+  int windowWidth, windowHeight;
+  SDL_GetRendererOutputSize(mRenderer, &windowWidth, &windowHeight);
+
+  for (auto entity : mWorld) {
+    auto transform_val = entity->get<transform>();
+    if (transform_val == nullptr) {
+      continue;
+    }
+    SDL_Rect rect;
+    rect.x = transform_val->position.x;
+    rect.y = transform_val->position.y;
+    rect.w = 5;
+    rect.h = 5;
+    SDL_SetRenderDrawColor(mRenderer, 255, 0, 0, 255);
+    SDL_RenderFillRect(mRenderer, &rect);
+  }
+
+  SDL_RenderPresent(mRenderer);
 }
 
-std::list<std::shared_ptr<Entity>>::iterator World::end() {
-  return this->entityList.end();
-}
+void game::handleEvent(const SDL_Event& event) {
 
-inline bool Entity::operator==(Entity& entity) const {
-  return this->id == entity.id;
 }

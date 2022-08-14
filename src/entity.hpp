@@ -30,6 +30,10 @@ class entity {
     }
     return std::any_cast<T&>(it->second);
   };
+  template<class T> T& set() {
+    T value;
+    return this->set<T>(value);
+  };
   template<class T> void remove() {
     std::type_index type_index(typeid(T));
     this->mComponentMap.erase(type_index);

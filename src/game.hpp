@@ -1,52 +1,22 @@
 #ifndef GAME_HPP_
 #define GAME_HPP_
 
-#include <list>
-#include <string>
-#include <memory>
-#include <vector>
-#include <glm/glm.hpp>
-#include <glm/gtx/quaternion.hpp>
+#include <SDL2/SDL.h>
+#include <SDL2/SDL_video.h>
 
-struct Transform {
-  alignas(16) glm::vec3 position {0., 0., 0.};
-  alignas(16) glm::vec3 scale {1., 1., 1.};
-  alignas(16) glm::quat rotation {0., 0., 0., 1.};
-};
+#include "world.hpp"
 
-typedef int EntityId;
-typedef int TileId;
-
-class Entity {
+class game {
   public:
-    EntityId id;
-    Transform transform;
-    glm::vec3 velocity {0., 0., 0.};
-    std::string name;
-    
-    inline bool operator==(Entity& entity) const;
-};
+  world mWorld;
+  SDL_Renderer *mRenderer;
 
-class Tile {
-  public:
-    TileId tileId;
-};
+  game(SDL_Renderer *renderer): mWorld(), mRenderer(renderer) {}
 
-class TileMap {
-  private:
-    std::vector<std::vector<Tile>> tiles;
-};
-
-class World {
-  private:
-    EntityId idCounter = 0;
-  public:
-    std::list<std::shared_ptr<Entity>> entityList {};
-    
-    std::shared_ptr<Entity>& create();
-    void remove(std::shared_ptr<Entity>& entity);
-    std::list<std::shared_ptr<Entity>>::iterator begin();
-    std::list<std::shared_ptr<Entity>>::iterator end();
+  void init();
+  void update();
+  void render();
+  void handleEvent(const SDL_Event& event);
 };
 
 #endif // GAME_HPP_
