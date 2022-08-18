@@ -2,13 +2,17 @@
 #include "entity.hpp"
 #include "transform.hpp"
 #include "velocity.hpp"
+#include "tile.hpp"
 
 void game::init() {
+  tile::loadTile(*this);
 }
 
 void game::update() {
   int windowWidth, windowHeight;
   SDL_GetRendererOutputSize(mRenderer, &windowWidth, &windowHeight);
+
+  tile::updateTile(*this);
 
   for (int i = 0; i < 10; i += 1) {
     auto entity = mWorld.create();
@@ -51,6 +55,8 @@ void game::render() {
 
   int windowWidth, windowHeight;
   SDL_GetRendererOutputSize(mRenderer, &windowWidth, &windowHeight);
+
+  tile::renderTile(*this);
 
   for (auto entity : mWorld) {
     auto transform_val = entity->get<transform>();
