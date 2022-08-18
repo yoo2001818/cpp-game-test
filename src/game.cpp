@@ -30,6 +30,7 @@ void game::update() {
     auto transform_val = entity->get<transform>();
     auto velocity_val = entity->get<velocity>();
     if (transform_val == nullptr || velocity_val == nullptr) {
+      i ++;
       continue;
     }
     transform_val->position.x += velocity_val->value.x * 2.0;
