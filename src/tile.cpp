@@ -1,7 +1,17 @@
+#include <SDL2/SDL.h>
+#include <SDL2/SDL_image.h>
 #include "tile.hpp"
 #include "transform.hpp"
 
+SDL_Texture *TILE_TEXTURE;
+
 void tile::loadTile(game& game) {
+  // TODO: Move this to asset manager
+  TILE_TEXTURE = IMG_LoadTexture(game.mRenderer, "res/tile.png");
+  if (TILE_TEXTURE == nullptr) {
+    throw std::runtime_error("Failed to load tile image");
+  }
+
   for (int y = 0; y < 30; y += 1) {
     for (int x = 0; x < 30; x += 1) {
       auto entity = game.mWorld.create();
@@ -34,17 +44,18 @@ void tile::renderTile(game& game) {
     rect.y = transform_val->position.y * TILE_SIZE;
     rect.w = TILE_SIZE;
     rect.h = TILE_SIZE;
+    SDL_Rect srcRect;
     switch(tile_val->id) {
       case 0:
-        SDL_SetRenderDrawColor(game.mRenderer, 255, 0, 0, 255);
+        srcRect = { 0, 0, 48, 48 };
         break;
       case 1:
-        SDL_SetRenderDrawColor(game.mRenderer, 0, 255, 0, 255);
+        srcRect = { 48, 0, 48, 48 };
         break;
       case 2:
-        SDL_SetRenderDrawColor(game.mRenderer, 0, 0, 255, 255);
+        srcRect = { 0, 48, 48, 48 };
         break;
     }
-    SDL_RenderFillRect(game.mRenderer, &rect);
+    SDL_RenderCopy(game.mRenderer, TILE_TEXTURE, &srcRect, &rect);
   }
 }
