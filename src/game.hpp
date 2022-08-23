@@ -5,10 +5,12 @@
 #include <SDL2/SDL_video.h>
 
 #include "world.hpp"
+#include "viewport.hpp"
 
 class game {
   public:
   world mWorld;
+  viewport mViewport;
   SDL_Renderer *mRenderer;
 
   game(SDL_Renderer *renderer): mWorld(), mRenderer(renderer) {}
