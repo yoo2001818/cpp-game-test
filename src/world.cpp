@@ -50,10 +50,10 @@ std::shared_ptr<entity> world::get(const entity_id& id) {
 }
 
 world::iterator world::begin() {
-  return world::iterator(this->mEntityList.begin());
+  return world::iterator(this->mEntityList.begin(), this->mEntityList.end());
 }
 
 world::iterator world::end() {
-  return world::iterator(this->mEntityList.end());
+  return world::iterator(this->mEntityList.end(), this->mEntityList.end());
 }
 

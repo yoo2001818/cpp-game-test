@@ -19,39 +19,57 @@ class world {
     using pointer = value_type*;
     using reference = value_type&;
 
-    iterator(std::vector<std::shared_ptr<entity>>::iterator pEnclosedIterator):
-      mEnclosedIterator(pEnclosedIterator) {};
+    using base_iterator = std::vector<std::shared_ptr<entity>>::iterator;
+
+    iterator(
+      base_iterator pIterator,
+      base_iterator pEnd
+    ): mIterator(pIterator), mEnd(pEnd) {
+      skipToValid();
+    };
     iterator(const iterator&) = default;
     ~iterator() {};
     iterator& operator=(const iterator& target) {
-      mEnclosedIterator = target.mEnclosedIterator;
+      mIterator = target.mIterator;
       return *this;
     };
     iterator& operator++() {
-      ++ mEnclosedIterator; 
+      ++ mIterator; 
+      skipToValid();
       return *this;
     };
     iterator operator++(int) {
-      return mEnclosedIterator ++;
+      iterator copy(*this);
+      mIterator ++;
+      skipToValid();
+      return copy;
     };
     reference operator*() const {
-      return *mEnclosedIterator;
+      return *mIterator;
     };
     pointer operator->() const {
-      return &*mEnclosedIterator;
+      return &*mIterator;
     };
     friend void swap(iterator& lhs, iterator& rhs) {
-      std::swap(lhs.mEnclosedIterator, rhs.mEnclosedIterator);
+      std::swap(lhs.mIterator, rhs.mIterator);
     };
     friend bool operator==(const iterator& lhs, const iterator& rhs) {
-      return lhs.mEnclosedIterator == rhs.mEnclosedIterator;
+      return lhs.mIterator == rhs.mIterator;
     };
     friend bool operator!=(const iterator& lhs, const iterator& rhs) {
-      return lhs.mEnclosedIterator != rhs.mEnclosedIterator;
+      return lhs.mIterator != rhs.mIterator;
     };
 
     private:
-    std::vector<std::shared_ptr<entity>>::iterator mEnclosedIterator;
+    std::vector<std::shared_ptr<entity>>::iterator mIterator;
+    std::vector<std::shared_ptr<entity>>::iterator mEnd;
+
+    void skipToValid() {
+      while (mIterator != mEnd) {
+        if ((*mIterator)->mIsAlive) return;
+        mIterator ++;
+      }
+    }
   };
   std::vector<std::shared_ptr<entity>> mEntityList;
 
