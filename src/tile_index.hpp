@@ -9,7 +9,7 @@
 
 class tile_index {
   public:
-    std::map<int32_t[2], std::list<entity&>> mTileMap;
+    std::map<int32_t[2], std::list<entity_id>> mTileMap;
 };
 
 #endif // TILE_INDEX_HPP_

@@ -4,12 +4,34 @@
 #include <map>
 #include <typeindex>
 #include <any>
+#include <cstdint>
+
+struct entity_id {
+  uint32_t id;
+  uint32_t version;
+};
 
 class entity {
   public:
-  entity(): mComponentMap() {};
-  entity(entity&& pEntity): mComponentMap(std::move(pEntity.mComponentMap)) {};
-  entity(const entity& pEntity): mComponentMap(pEntity.mComponentMap) {};
+  entity_id mEntityId;
+  bool mIsAlive;
+
+  entity():
+    mComponentMap(),
+    mEntityId(),
+    mIsAlive(false) {};
+  entity(entity&& pEntity):
+    mComponentMap(std::move(pEntity.mComponentMap)),
+    mEntityId(pEntity.mEntityId),
+    mIsAlive(pEntity.mIsAlive) {};
+  entity(const entity& pEntity):
+    mComponentMap(pEntity.mComponentMap),
+    mEntityId(pEntity.mEntityId),
+    mIsAlive(pEntity.mIsAlive) {};
+
+  entity& entity::operator=(entity&& pEntity) {
+    mComponentMap = std::move(pEntity.mComponentMap);
+  }
 
   template<class T> T* get() {
     std::type_index type_index(typeid(T));
