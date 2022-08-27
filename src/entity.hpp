@@ -29,8 +29,9 @@ class entity {
     mEntityId(pEntity.mEntityId),
     mIsAlive(pEntity.mIsAlive) {};
 
-  entity& entity::operator=(entity&& pEntity) {
+  entity& operator=(entity&& pEntity) {
     mComponentMap = std::move(pEntity.mComponentMap);
+    return *this;
   }
 
   template<class T> T* get() {

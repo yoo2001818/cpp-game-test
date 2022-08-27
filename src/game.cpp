@@ -25,12 +25,11 @@ void game::update() {
     velocity_val.value = glm::normalize(velocity_val.value);
   }
 
-  for (auto i = mWorld.begin(); i != mWorld.end();) {
+  for (auto i = mWorld.begin(); i != mWorld.end(); i++) {
     auto entity = *i;
     auto transform_val = entity->get<transform>();
     auto velocity_val = entity->get<velocity>();
     if (transform_val == nullptr || velocity_val == nullptr) {
-      i ++;
       continue;
     }
     transform_val->position.x += velocity_val->value.x * 2.0;
@@ -42,9 +41,7 @@ void game::update() {
       transform_val->position.y < 0.0 ||
       transform_val->position.y > windowHeight
     ) {
-      i = mWorld.mEntityList.erase(i);
-    } else {
-      i ++;
+      mWorld.remove(*entity);
     }
   }
 }

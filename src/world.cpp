@@ -49,11 +49,11 @@ std::shared_ptr<entity> world::get(const entity_id& id) {
   return std::move(target_in_world);
 }
 
-std::vector<std::shared_ptr<entity>>::iterator world::begin() {
-  return this->mEntityList.begin();
+world::iterator world::begin() {
+  return world::iterator(this->mEntityList.begin());
 }
 
-std::vector<std::shared_ptr<entity>>::iterator world::end() {
-  return this->mEntityList.end();
+world::iterator world::end() {
+  return world::iterator(this->mEntityList.end());
 }
 
