@@ -10,67 +10,119 @@
 #include "entity.hpp"
 #include "tile_index.hpp"
 
+template <class base_t, class filter_t>
+struct filtered_iterator {
+  public:
+  using iterator_category = std::forward_iterator_tag;
+  using difference_type = std::ptrdiff_t;
+  using value_type = std::shared_ptr<entity>;
+  using pointer = value_type*;
+  using reference = value_type&;
+
+  using base_iterator = base_t;
+
+  filtered_iterator(
+    base_iterator pIterator,
+    base_iterator pEnd,
+    filter_t pFilter
+  ): mIterator(pIterator), mEnd(pEnd), mFilter(pFilter) {
+    skipToValid();
+  };
+  filtered_iterator(const filtered_iterator&) = default;
+  ~filtered_iterator() {};
+  filtered_iterator& operator=(const filtered_iterator& target) {
+    mIterator = target.mIterator;
+    return *this;
+  };
+  filtered_iterator& operator++() {
+    ++ mIterator; 
+    skipToValid();
+    return *this;
+  };
+  filtered_iterator operator++(int) {
+    filtered_iterator copy(*this);
+    mIterator ++;
+    skipToValid();
+    return copy;
+  };
+  reference operator*() const {
+    return *mIterator;
+  };
+  pointer operator->() const {
+    return &*mIterator;
+  };
+  friend void swap(filtered_iterator& lhs, filtered_iterator& rhs) {
+    std::swap(lhs.mIterator, rhs.mIterator);
+  };
+  friend bool operator==(const filtered_iterator& lhs, const filtered_iterator& rhs) {
+    return lhs.mIterator == rhs.mIterator;
+  };
+  friend bool operator!=(const filtered_iterator& lhs, const filtered_iterator& rhs) {
+    return lhs.mIterator != rhs.mIterator;
+  };
+
+  private:
+  base_iterator mIterator;
+  base_iterator mEnd;
+  filter_t mFilter;
+
+  void skipToValid() {
+    while (mIterator != mEnd) {
+      if (mFilter.test(**mIterator)) return;
+      mIterator++;
+    }
+  }
+};
+
 class world {
   public:
-  struct iterator {
+  class entity_filter {
     public:
-    using iterator_category = std::forward_iterator_tag;
-    using difference_type = std::ptrdiff_t;
-    using value_type = std::shared_ptr<entity>;
-    using pointer = value_type*;
-    using reference = value_type&;
-
-    using base_iterator = std::vector<std::shared_ptr<entity>>::iterator;
-
-    iterator(
-      base_iterator pIterator,
-      base_iterator pEnd
-    ): mIterator(pIterator), mEnd(pEnd) {
-      skipToValid();
+    bool test(entity& entity) {
+      return entity.isAlive();
     };
-    iterator(const iterator&) = default;
-    ~iterator() {};
-    iterator& operator=(const iterator& target) {
-      mIterator = target.mIterator;
-      return *this;
+  };
+  using entity_iterator = filtered_iterator<std::vector<std::shared_ptr<entity>>::iterator, entity_filter>;
+  template<class T, class... Ts>
+  class query {
+    public:
+    class filter {
+      public:
+      bool test(entity& entity) {
+        return mParent.test(entity) && entity.has<T>();
+      };
+      query<Ts...>::filter mParent;
     };
-    iterator& operator++() {
-      ++ mIterator; 
-      skipToValid();
-      return *this;
+    using iterator = filtered_iterator<entity_iterator, filter>;
+    query(world * pWorld): mWorld(pWorld) {};
+    iterator begin() {
+      return iterator(mWorld->begin(), mWorld->end(), {});
     };
-    iterator operator++(int) {
-      iterator copy(*this);
-      mIterator ++;
-      skipToValid();
-      return copy;
+    iterator end() {
+      return iterator(mWorld->end(), mWorld->end(), {});
     };
-    reference operator*() const {
-      return *mIterator;
-    };
-    pointer operator->() const {
-      return &*mIterator;
-    };
-    friend void swap(iterator& lhs, iterator& rhs) {
-      std::swap(lhs.mIterator, rhs.mIterator);
-    };
-    friend bool operator==(const iterator& lhs, const iterator& rhs) {
-      return lhs.mIterator == rhs.mIterator;
-    };
-    friend bool operator!=(const iterator& lhs, const iterator& rhs) {
-      return lhs.mIterator != rhs.mIterator;
-    };
-
     private:
-    std::vector<std::shared_ptr<entity>>::iterator mIterator;
-    std::vector<std::shared_ptr<entity>>::iterator mEnd;
-
-    void skipToValid() {
-      while (mIterator != mEnd) {
-        if ((*mIterator)->isAlive()) return;
-        mIterator ++;
-      }
-    }
+    world * mWorld;
+  };
+  template<class T>
+  class query<T> {
+    public:
+    class filter {
+      public:
+      bool test(entity& entity) {
+        return entity.has<T>();
+      };
+    };
+    using iterator = filtered_iterator<entity_iterator, filter>;
+    query(world * pWorld): mWorld(pWorld) {};
+    iterator begin() {
+      return iterator(mWorld->begin(), mWorld->end(), {});
+    };
+    iterator end() {
+      return iterator(mWorld->end(), mWorld->end(), {});
+    };
+    private:
+    world * mWorld;
   };
   std::vector<std::shared_ptr<entity>> mEntityList;
 
@@ -86,12 +138,15 @@ class world {
   void remove(const entity& entity);
   void remove(const entity_id& entity);
   std::shared_ptr<entity> get(const entity_id& id) const;
-  iterator begin();
-  iterator end();
+  entity_iterator begin();
+  entity_iterator end();
   void markDirty(const entity& entity);
   void markDirty(const entity_id& id);
   void updateIndex();
   tile_index& getTileIndex();
+  template<class... Ts> query<Ts...> getQuery() {
+    return { this };
+  };
 
   private:
   std::stack<std::shared_ptr<entity>> mDeadEntityList;

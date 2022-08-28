@@ -25,13 +25,11 @@ void game::update() {
     velocity_val.value = glm::normalize(velocity_val.value);
   }
 
-  for (auto i = mWorld.begin(); i != mWorld.end(); i++) {
+  auto query = mWorld.getQuery<transform, velocity>();
+  for (auto i = query.begin(); i != query.end(); i++) {
     auto entity = *i;
     auto transform_val = entity->get<transform>();
     auto velocity_val = entity->get<velocity>();
-    if (transform_val == nullptr || velocity_val == nullptr) {
-      continue;
-    }
     transform_val->position.x += velocity_val->value.x * 2.0;
     transform_val->position.y += velocity_val->value.y * 2.0;
 
@@ -64,8 +62,8 @@ void game::render() {
     SDL_Rect rect;
     rect.x = transform_val->position.x;
     rect.y = transform_val->position.y;
-    rect.w = 5;
-    rect.h = 5;
+    rect.w = 3;
+    rect.h = 3;
     SDL_SetRenderDrawColor(mRenderer, 255, 0, 0, 255);
     SDL_RenderFillRect(mRenderer, &rect);
   }

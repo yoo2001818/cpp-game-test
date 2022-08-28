@@ -53,12 +53,12 @@ std::shared_ptr<entity> world::get(const entity_id& id) const {
   return std::move(target);
 }
 
-world::iterator world::begin() {
-  return world::iterator(this->mEntityList.begin(), this->mEntityList.end());
+world::entity_iterator world::begin() {
+  return world::entity_iterator(this->mEntityList.begin(), this->mEntityList.end(), {});
 }
 
-world::iterator world::end() {
-  return world::iterator(this->mEntityList.end(), this->mEntityList.end());
+world::entity_iterator world::end() {
+  return world::entity_iterator(this->mEntityList.end(), this->mEntityList.end(), {});
 }
 
 void world::markDirty(const entity& entity) {
