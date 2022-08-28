@@ -5,6 +5,7 @@
 #include <sstream>
 #include "tile.hpp"
 #include "transform.hpp"
+#include "boundary.hpp"
 
 SDL_Texture *TILE_TEXTURE;
 
@@ -35,6 +36,8 @@ void tile::loadTile(game& game) {
         transform_val.position.y = static_cast<float>(y);
 
         auto& tile_val = entity->set<tile>({ id });
+        entity->set<boundary>();
+
         game.mWorld.markDirty(*entity);
       }
       x += 1;
@@ -45,31 +48,44 @@ void tile::loadTile(game& game) {
 }
 
 void tile::updateTile(game& game) {
-
+  // std::cout << game.mWorld.getTileIndex().mTileMap.size() << std::endl;
 }
 
 const int TILE_SIZE = 36;
 
 void tile::renderTile(game& game) {
-  for (auto entity : game.mWorld) {
-    auto transform_val = entity->get<transform>();
-    if (transform_val == nullptr) {
-      continue;
+  int windowWidth, windowHeight;
+  SDL_GetRendererOutputSize(game.mRenderer, &windowWidth, &windowHeight);
+
+  int tileWidth = (windowWidth + TILE_SIZE - 1) / TILE_SIZE;
+  int tileHeight = (windowHeight + TILE_SIZE - 1) / TILE_SIZE;
+
+  for (int y = 0; y < tileHeight; y += 1) {
+    for (int x = 0; x < tileWidth; x += 1) {
+      auto entity_set = game.mWorld.getTileIndex().get({x, y});
+      for (auto entity_id : entity_set) {
+        auto entity = game.mWorld.get(entity_id);
+        if (entity == nullptr) continue;
+        auto transform_val = entity->get<transform>();
+        if (transform_val == nullptr) {
+          continue;
+        }
+        auto tile_val = entity->get<tile>();
+        if (tile_val == nullptr) {
+          continue;
+        }
+        SDL_Rect rect;
+        rect.x = transform_val->position.x * TILE_SIZE;
+        rect.y = transform_val->position.y * TILE_SIZE;
+        rect.w = TILE_SIZE;
+        rect.h = TILE_SIZE;
+        SDL_Rect srcRect;
+        srcRect.x = (tile_val->id % 20) * 18;
+        srcRect.y = (tile_val->id / 20) * 18;
+        srcRect.w = 18;
+        srcRect.h = 18;
+        SDL_RenderCopy(game.mRenderer, TILE_TEXTURE, &srcRect, &rect);
+      }
     }
-    auto tile_val = entity->get<tile>();
-    if (tile_val == nullptr) {
-      continue;
-    }
-    SDL_Rect rect;
-    rect.x = transform_val->position.x * TILE_SIZE;
-    rect.y = transform_val->position.y * TILE_SIZE;
-    rect.w = TILE_SIZE;
-    rect.h = TILE_SIZE;
-    SDL_Rect srcRect;
-    srcRect.x = (tile_val->id % 20) * 18;
-    srcRect.y = (tile_val->id / 20) * 18;
-    srcRect.w = 18;
-    srcRect.h = 18;
-    SDL_RenderCopy(game.mRenderer, TILE_TEXTURE, &srcRect, &rect);
   }
 }

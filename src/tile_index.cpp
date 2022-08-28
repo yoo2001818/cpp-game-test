@@ -1,4 +1,5 @@
 #include <cmath>
+#include <iostream>
 #include "tile_index.hpp"
 #include "world.hpp"
 #include "boundary.hpp"

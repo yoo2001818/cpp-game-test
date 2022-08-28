@@ -24,6 +24,7 @@ class tile_index {
   std::set<entity_id>& get(const tile& tile);
 
   private:
+  public:
   std::map<tile, std::set<entity_id>> mTileMap;
   std::map<entity_id, std::set<tile>> mOccupiedTiles;
   world& mWorld;

@@ -10,14 +10,14 @@ struct entity_id {
   uint32_t id;
   uint32_t version;
 
-  friend bool operator== (const entity_id& e1, const entity_id& e2);
-  friend bool operator!= (const entity_id& e1, const entity_id& e2);
+  friend bool operator==(const entity_id& e1, const entity_id& e2);
+  friend bool operator!=(const entity_id& e1, const entity_id& e2);
 
-  friend bool operator< (const entity_id& e1, const entity_id& e2);
-  friend bool operator> (const entity_id& e1, const entity_id& e2);
+  friend bool operator<(const entity_id& e1, const entity_id& e2);
+  friend bool operator>(const entity_id& e1, const entity_id& e2);
 
-  friend bool operator<= (const entity_id& e1, const entity_id& e2);
-  friend bool operator>= (const entity_id& e1, const entity_id& e2);
+  friend bool operator<=(const entity_id& e1, const entity_id& e2);
+  friend bool operator>=(const entity_id& e1, const entity_id& e2);
 };
 
 class entity {
