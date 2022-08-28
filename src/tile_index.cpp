@@ -1,5 +1,4 @@
 #include <cmath>
-#include <iostream>
 #include "tile_index.hpp"
 #include "world.hpp"
 #include "boundary.hpp"
@@ -40,8 +39,8 @@ void tile_index::insert(entity& entity) {
     static_cast<int32_t>(std::ceil(transform_val->position.y + boundary_val->max.y)),
   };
   std::set<tile_index::tile> occupiedTiles;
-  for (int y = min[1]; y <= max[1]; y += 1) {
-    for (int x = min[0]; x <= max[0]; x += 1) {
+  for (int y = min[1]; y < max[1]; y += 1) {
+    for (int x = min[0]; x < max[0]; x += 1) {
       tile_index::tile current {x, y};
       auto [it, is_created] = mTileMap.emplace(std::pair(current, std::set<entity_id>()));
       it->second.insert(id);
