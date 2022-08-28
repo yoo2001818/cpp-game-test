@@ -3,6 +3,7 @@
 #include <iostream>
 #include <fstream>
 #include <sstream>
+#include <cmath>
 #include "tile.hpp"
 #include "transform.hpp"
 #include "boundary.hpp"
@@ -57,12 +58,22 @@ void tile::renderTile(game& game) {
   int windowWidth, windowHeight;
   SDL_GetRendererOutputSize(game.mRenderer, &windowWidth, &windowHeight);
 
-  int tileWidth = (windowWidth + TILE_SIZE - 1) / TILE_SIZE;
-  int tileHeight = (windowHeight + TILE_SIZE - 1) / TILE_SIZE;
+  float offsetX = game.mViewport.mTransform.position.x;
+  float offsetY = game.mViewport.mTransform.position.y;
+  int tileOffsetX = static_cast<int32_t>(std::floor(offsetX));
+  int tileOffsetY = static_cast<int32_t>(std::floor(offsetY));
+  float deltaX = std::fmod(offsetX, 1.0);
+  float deltaY = std::fmod(offsetY, 1.0);
+  if (deltaX < 0.0) deltaX += 1.0;
+  if (deltaY < 0.0) deltaY += 1.0;
+  int tileDeltaX = static_cast<int32_t>(std::floor(deltaX * TILE_SIZE));
+  int tileDeltaY = static_cast<int32_t>(std::floor(deltaY * TILE_SIZE));
+  int tileWidth = (windowWidth + TILE_SIZE - 1) / TILE_SIZE + 1;
+  int tileHeight = (windowHeight + TILE_SIZE - 1) / TILE_SIZE + 1;
 
   for (int y = 0; y < tileHeight; y += 1) {
     for (int x = 0; x < tileWidth; x += 1) {
-      auto entity_set = game.mWorld.getTileIndex().get({x, y});
+      auto entity_set = game.mWorld.getTileIndex().get({x + tileOffsetX, y + tileOffsetY});
       for (auto entity_id : entity_set) {
         auto entity = game.mWorld.get(entity_id);
         if (entity == nullptr) continue;
@@ -70,8 +81,8 @@ void tile::renderTile(game& game) {
         if (transform_val == nullptr) continue;
         if (tile_val == nullptr) continue;
         SDL_Rect rect;
-        rect.x = transform_val->position.x * TILE_SIZE;
-        rect.y = transform_val->position.y * TILE_SIZE;
+        rect.x = (transform_val->position.x - tileOffsetX) * TILE_SIZE - tileDeltaX;
+        rect.y = (transform_val->position.y - tileOffsetY) * TILE_SIZE - tileDeltaY;
         rect.w = TILE_SIZE;
         rect.h = TILE_SIZE;
         SDL_Rect srcRect;

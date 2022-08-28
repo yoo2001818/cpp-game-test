@@ -14,6 +14,7 @@ void game::update() {
 
   tile::updateTile(*this);
 
+  /*
   for (int i = 0; i < 10; i += 1) {
     auto entity = mWorld.create();
     auto& transform_val = entity->set<transform>();
@@ -24,6 +25,7 @@ void game::update() {
     velocity_val.value.y = static_cast<float>(rand()) / static_cast<float>(RAND_MAX) * 2.0 - 1.0;
     velocity_val.value = glm::normalize(velocity_val.value);
   }
+  */
 
   auto query = mWorld.getQuery<transform, velocity>();
   for (auto i = query.begin(); i != query.end(); i++) {
@@ -41,6 +43,14 @@ void game::update() {
       mWorld.remove(*entity);
     }
   }
+
+  SDL_PumpEvents();
+  int mouseX;
+  int mouseY;
+  SDL_GetMouseState(&mouseX, &mouseY);
+
+  mViewport.mTransform.position.x = -(mouseX - windowWidth / 2) / 36.0;
+  mViewport.mTransform.position.y = -(mouseY - windowHeight / 2) / 36.0;
 }
 
 void game::render() {
@@ -71,5 +81,4 @@ void game::render() {
 }
 
 void game::handleEvent(const SDL_Event& event) {
-
 }
