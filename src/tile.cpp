@@ -35,11 +35,13 @@ void tile::loadTile(game& game) {
         transform_val.position.y = static_cast<float>(y);
 
         auto& tile_val = entity->set<tile>({ id });
+        game.mWorld.markDirty(*entity);
       }
       x += 1;
     }
     y += 1;
   }
+  game.mWorld.updateIndex();
 }
 
 void tile::updateTile(game& game) {

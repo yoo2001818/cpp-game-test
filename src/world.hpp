@@ -8,6 +8,7 @@
 #include <iterator>
 #include <cstddef>
 #include "entity.hpp"
+#include "tile_index.hpp"
 
 class world {
   public:
@@ -66,24 +67,37 @@ class world {
 
     void skipToValid() {
       while (mIterator != mEnd) {
-        if ((*mIterator)->mIsAlive) return;
+        if ((*mIterator)->isAlive()) return;
         mIterator ++;
       }
     }
   };
   std::vector<std::shared_ptr<entity>> mEntityList;
 
+  world():
+    mEntityList(),
+    mDeadEntityList(),
+    mDirtyEntityList(),
+    mEntityCount(0),
+    mTileIndex(*this) {};
+
   std::shared_ptr<entity> create();
   std::shared_ptr<entity> add(entity&& entity);
   void remove(const entity& entity);
   void remove(const entity_id& entity);
-  std::shared_ptr<entity> get(const entity_id& id);
+  std::shared_ptr<entity> get(const entity_id& id) const;
   iterator begin();
   iterator end();
+  void markDirty(const entity& entity);
+  void markDirty(const entity_id& id);
+  void updateIndex();
+  tile_index& getTileIndex();
 
   private:
   std::stack<std::shared_ptr<entity>> mDeadEntityList;
+  std::stack<entity_id> mDirtyEntityList;
   uint32_t mEntityCount;
+  tile_index mTileIndex;
 };
 
 #endif // WORLD_HPP_
