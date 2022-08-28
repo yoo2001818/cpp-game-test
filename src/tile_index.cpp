@@ -25,9 +25,8 @@ void tile_index::remove(const entity_id& id) {
 void tile_index::insert(entity& entity) {
   // NOTE: This does not support any matrix operations
   const entity_id& id = entity.getId();
-  auto transform_val = entity.get<transform>();
+  auto [transform_val, boundary_val] = entity.try_get<transform, boundary>();
   if (transform_val == nullptr) return;
-  auto boundary_val = entity.get<boundary>();
   if (boundary_val == nullptr) return;
   
   tile_index::tile min {

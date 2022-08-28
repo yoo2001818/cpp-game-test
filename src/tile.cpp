@@ -66,14 +66,9 @@ void tile::renderTile(game& game) {
       for (auto entity_id : entity_set) {
         auto entity = game.mWorld.get(entity_id);
         if (entity == nullptr) continue;
-        auto transform_val = entity->get<transform>();
-        if (transform_val == nullptr) {
-          continue;
-        }
-        auto tile_val = entity->get<tile>();
-        if (tile_val == nullptr) {
-          continue;
-        }
+        auto [transform_val, tile_val] = entity->try_get<transform, tile>();
+        if (transform_val == nullptr) continue;
+        if (tile_val == nullptr) continue;
         SDL_Rect rect;
         rect.x = transform_val->position.x * TILE_SIZE;
         rect.y = transform_val->position.y * TILE_SIZE;

@@ -28,16 +28,15 @@ void game::update() {
   auto query = mWorld.getQuery<transform, velocity>();
   for (auto i = query.begin(); i != query.end(); i++) {
     auto entity = *i;
-    auto transform_val = entity->get<transform>();
-    auto velocity_val = entity->get<velocity>();
-    transform_val->position.x += velocity_val->value.x * 2.0;
-    transform_val->position.y += velocity_val->value.y * 2.0;
+    auto [transform_val, velocity_val] = entity->get<transform, velocity>();
+    transform_val.position.x += velocity_val.value.x * 2.0;
+    transform_val.position.y += velocity_val.value.y * 2.0;
 
     if (
-      transform_val->position.x < 0.0 ||
-      transform_val->position.x > windowWidth ||
-      transform_val->position.y < 0.0 ||
-      transform_val->position.y > windowHeight
+      transform_val.position.x < 0.0 ||
+      transform_val.position.x > windowWidth ||
+      transform_val.position.y < 0.0 ||
+      transform_val.position.y > windowHeight
     ) {
       mWorld.remove(*entity);
     }
@@ -55,7 +54,7 @@ void game::render() {
   tile::renderTile(*this);
 
   for (auto entity : mWorld) {
-    auto transform_val = entity->get<transform>();
+    auto transform_val = entity->try_get<transform>();
     if (transform_val == nullptr) {
       continue;
     }

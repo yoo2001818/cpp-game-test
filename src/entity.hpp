@@ -5,6 +5,7 @@
 #include <typeindex>
 #include <any>
 #include <cstdint>
+#include <tuple>
 
 struct entity_id {
   uint32_t id;
@@ -46,13 +47,42 @@ class entity {
     return *this;
   }
 
-  template<class T> T* get() {
+  template<class T> T& get() {
+    std::type_index type_index(typeid(T));
+    auto it = this->mComponentMap.find(type_index);
+    return std::any_cast<T&>(it->second);
+  };
+  private:
+  template<class T, class ...Ts> std::tuple<T&, Ts&...> get_list() {
+    if constexpr(sizeof...(Ts) == 0) {
+      return std::tie(get<T>());
+    } else {
+      return std::tuple_cat(std::tie(get<T>()), get_list<Ts...>());
+    }
+  };
+  public:
+  template<class T, class T2, class ...Ts> std::tuple<T&, T2&, Ts&...> get() {
+    return get_list<T, T2, Ts...>();
+  };
+  template<class T> T* try_get() {
     std::type_index type_index(typeid(T));
     auto it = this->mComponentMap.find(type_index);
     if (it == this->mComponentMap.end()) {
       return nullptr;
     }
     return &std::any_cast<T&>(it->second);
+  };
+  private:
+  template<class T, class ...Ts> std::tuple<T*, Ts*...> try_get_list() {
+    if constexpr(sizeof...(Ts) == 0) {
+      return std::make_tuple(try_get<T>());
+    } else {
+      return std::tuple_cat(std::make_tuple(try_get<T>()), try_get_list<Ts...>());
+    }
+  };
+  public:
+  template<class T, class T2, class ...Ts> std::tuple<T*, T2*, Ts*...> try_get() {
+    return try_get_list<T, T2, Ts...>();
   };
   template<class T> T& set(const T& value) {
     std::type_index type_index(typeid(T));
