@@ -19,7 +19,7 @@ void tile::loadTile(game& game) {
 
   // Read map file
   std::ifstream mapFile;
-  mapFile.open("res/map2.csv");
+  mapFile.open("res/map.csv");
   
   int y = 0;
   std::string line;

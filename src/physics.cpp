@@ -1,3 +1,5 @@
+#include <iostream>
+
 #include "physics.hpp"
 #include "transform.hpp"
 #include "boundary.hpp"
@@ -11,13 +13,16 @@ void physics::updatePhysics(game& game) {
     // Gravity
     physics_val.force += glm::vec3(0., 0.3 / 60.0 * physics_val.mass, 0.);
     // Air resistance
-    physics_val.force -= physics_val.velocity * physics_val.velocity * surface_size * glm::vec3(0.5 * 0.2);
+    physics_val.force -=
+      glm::sign(physics_val.velocity) *
+      physics_val.velocity * physics_val.velocity * surface_size * glm::vec3(0.5 * 0.2);
 
     // Apply net force to velocity & update position
     physics_val.velocity += physics_val.force / physics_val.mass;
     transform_val.position += physics_val.velocity;
 
     // Collision check
+    auto prev_velocity = physics_val.velocity;
     auto world_rect = boundary_val.getWorldRect(transform_val);
     tile_index::tile min {
       static_cast<int32_t>(std::floor(world_rect.min.x)),
@@ -43,17 +48,24 @@ void physics::updatePhysics(game& game) {
           auto intersection_rect = intersection.value();
           // Move to the opposite direction to avoid collision
           auto intersection_size = intersection_rect.max - intersection_rect.min;
-          float move_amount;
-          auto abs_velocity = glm::abs(physics_val.velocity);
-          if (abs_velocity.x > abs_velocity.y) {
-            move_amount = intersection_size.x / abs_velocity.x;
+          if (intersection_size.y < intersection_size.x) {
+            transform_val.position.y -= glm::sign(prev_velocity.y) * intersection_size.y;
+            if (glm::abs(prev_velocity.y) < 0.01) {
+              physics_val.velocity.y = 0.0;
+            } else {
+              physics_val.velocity.y = -prev_velocity.y * 0.5;
+            }
+            physics_val.velocity.x /= 1.0 + intersection_size.x * 0.2;
           } else {
-            move_amount = intersection_size.y / abs_velocity.y;
+            transform_val.position.x -= glm::sign(prev_velocity.x) * intersection_size.x;
+            if (glm::abs(prev_velocity.x) < 0.01) {
+              physics_val.velocity.x = 0.0;
+            } else {
+              physics_val.velocity.x = -prev_velocity.x * 0.5;
+            }
+            physics_val.velocity.y /= 1.0 + intersection_size.y * 0.2;
           }
-          transform_val.position -= physics_val.velocity * move_amount;
           // TODO: Handle physics-physics object collision
-          // Reset velocity
-          physics_val.velocity = glm::vec3(0.0);
         }
       }
     }

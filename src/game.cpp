@@ -6,15 +6,18 @@
 #include "physics.hpp"
 #include "boundary.hpp"
 
+struct player {};
+
 void game::init() {
   tile::loadTile(*this);
   {
     auto entity = mWorld.create();
     auto& transform_val = entity->set<transform>();
-    transform_val.position.x = 0;
+    transform_val.position.x = 10.5;
     transform_val.position.y = 0;
     entity->set<physics::physics>();
     entity->set<boundary>();
+    entity->set<player>();
   }
 }
 
@@ -22,36 +25,30 @@ void game::update() {
   int windowWidth, windowHeight;
   SDL_GetRendererOutputSize(mRenderer, &windowWidth, &windowHeight);
 
+  auto query = mWorld.getQuery<player>();
+  const uint8_t* keyState = SDL_GetKeyboardState(nullptr);
+  for (auto entity : query) {
+    auto [physics_val, transform_val] = entity->get<physics::physics, transform>();
+    if (keyState[SDL_SCANCODE_LEFT]) {
+      physics_val.force.x -= 0.01;
+    }
+    if (keyState[SDL_SCANCODE_RIGHT]) {
+      physics_val.force.x += 0.01;
+    }
+    if (keyState[SDL_SCANCODE_SPACE]) {
+      if (std::abs(physics_val.velocity.y) < 0.001) {
+        physics_val.velocity.y = -0.3;
+      }
+    }
+  }
+
   tile::updateTile(*this);
   physics::updatePhysics(*this);
-  /*
-  for (int i = 0; i < 10; i += 1) {
-    auto entity = mWorld.create();
-    auto& transform_val = entity->set<transform>();
-    transform_val.position.x = windowWidth / 2;
-    transform_val.position.y = windowHeight / 2;
-    auto& velocity_val = entity->set<velocity>();
-    velocity_val.value.x = static_cast<float>(rand()) / static_cast<float>(RAND_MAX) * 2.0 - 1.0;
-    velocity_val.value.y = static_cast<float>(rand()) / static_cast<float>(RAND_MAX) * 2.0 - 1.0;
-    velocity_val.value = glm::normalize(velocity_val.value);
-  }
-  */
 
-  auto query = mWorld.getQuery<transform, velocity>();
-  for (auto i = query.begin(); i != query.end(); i++) {
-    auto entity = *i;
-    auto [transform_val, velocity_val] = entity->get<transform, velocity>();
-    transform_val.position.x += velocity_val.value.x * 2.0;
-    transform_val.position.y += velocity_val.value.y * 2.0;
-
-    if (
-      transform_val.position.x < 0.0 ||
-      transform_val.position.x > windowWidth ||
-      transform_val.position.y < 0.0 ||
-      transform_val.position.y > windowHeight
-    ) {
-      mWorld.remove(*entity);
-    }
+  for (auto entity : query) {
+    auto [physics_val, transform_val] = entity->get<physics::physics, transform>();
+    mViewport.mTransform.position.x = transform_val.position.x - windowWidth / 2 / 36.0;
+    mViewport.mTransform.position.y = transform_val.position.y - windowHeight / 2 / 36.0;
   }
 
   SDL_PumpEvents();
@@ -59,8 +56,8 @@ void game::update() {
   int mouseY;
   SDL_GetMouseState(&mouseX, &mouseY);
 
-  mViewport.mTransform.position.x = -(mouseX - windowWidth / 2) / 36.0;
-  mViewport.mTransform.position.y = -(mouseY - windowHeight / 2) / 36.0;
+  // mViewport.mTransform.position.x = -(mouseX - windowWidth / 2) / 36.0;
+  // mViewport.mTransform.position.y = -(mouseY - windowHeight / 2) / 36.0;
 }
 
 void game::render() {
@@ -98,8 +95,8 @@ void game::render() {
       continue;
     }
     SDL_Rect rect;
-    rect.x = transform_val->position.x;
-    rect.y = transform_val->position.y;
+    rect.x = transform_val->position.x * 3;
+    rect.y = transform_val->position.y * 3;
     rect.w = 3;
     rect.h = 3;
     SDL_SetRenderDrawColor(mRenderer, 255, 0, 0, 255);
