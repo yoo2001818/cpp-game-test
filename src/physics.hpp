@@ -6,8 +6,10 @@
 #include "game.hpp"
 
 namespace physics {
-  class physics {
-    alignas(16) glm::vec3 value {0., 0., 0.};
+  struct physics {
+    alignas(16) glm::vec3 velocity {0., 0., 0.};
+    alignas(16) glm::vec3 force {0., 0., 0.};
+    float mass = 1;
   };
 
   void updatePhysics(game& game);

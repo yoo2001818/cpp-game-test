@@ -29,13 +29,14 @@ void tile_index::insert(entity& entity) {
   if (transform_val == nullptr) return;
   if (boundary_val == nullptr) return;
   
+  auto world_rect = boundary_val->getWorldRect(*transform_val);
   tile_index::tile min {
-    static_cast<int32_t>(std::floor(transform_val->position.x + boundary_val->min.x)),
-    static_cast<int32_t>(std::floor(transform_val->position.y + boundary_val->min.y)),
+    static_cast<int32_t>(std::floor(world_rect.min.x)),
+    static_cast<int32_t>(std::floor(world_rect.min.y)),
   };
   tile_index::tile max {
-    static_cast<int32_t>(std::ceil(transform_val->position.x + boundary_val->max.x)),
-    static_cast<int32_t>(std::ceil(transform_val->position.y + boundary_val->max.y)),
+    static_cast<int32_t>(std::ceil(world_rect.max.x)),
+    static_cast<int32_t>(std::ceil(world_rect.max.y)),
   };
   std::set<tile_index::tile> occupiedTiles;
   for (int y = min[1]; y < max[1]; y += 1) {

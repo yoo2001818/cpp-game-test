@@ -4,6 +4,7 @@
 #include "velocity.hpp"
 #include "tile.hpp"
 #include "physics.hpp"
+#include "boundary.hpp"
 
 void game::init() {
   tile::loadTile(*this);
@@ -13,6 +14,7 @@ void game::init() {
     transform_val.position.x = 0;
     transform_val.position.y = 0;
     entity->set<physics::physics>();
+    entity->set<boundary>();
   }
 }
 
