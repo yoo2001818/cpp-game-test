@@ -15,7 +15,7 @@ void physics::updatePhysics(game& game) {
     // Air resistance
     physics_val.force -=
       glm::sign(physics_val.velocity) *
-      physics_val.velocity * physics_val.velocity * surface_size * glm::vec3(0.5 * 0.2);
+      physics_val.velocity * physics_val.velocity * surface_size * glm::vec3(0.5 * 0.8, 0.5 * 0.3, 1.0);
 
     // Apply net force to velocity & update position
     physics_val.velocity += physics_val.force / physics_val.mass;
@@ -55,17 +55,17 @@ void physics::updatePhysics(game& game) {
             if (glm::abs(prev_velocity.y) < 0.01) {
               physics_val.velocity.y = 0.0;
             } else {
-              physics_val.velocity.y = -prev_velocity.y * 0.2;
+              physics_val.velocity.y = -prev_velocity.y * 0.1;
             }
-            physics_val.velocity.x /= 1.0 + intersection_size.x * 0.2;
+            // physics_val.velocity.x /= 1.0 + intersection_size.x * 0.2;
           } else {
             transform_val.position.x -= glm::sign(pos_diff.x) * intersection_size.x;
             if (glm::abs(prev_velocity.x) < 0.01) {
               physics_val.velocity.x = 0.0;
             } else {
-              physics_val.velocity.x = -prev_velocity.x * 0.2;
+              physics_val.velocity.x = -prev_velocity.x * 0.1;
             }
-            physics_val.velocity.y /= 1.0 + intersection_size.y * 0.2;
+            // physics_val.velocity.y /= 1.0 + intersection_size.y * 0.2;
           }
           // TODO: Handle physics-physics object collision
         }

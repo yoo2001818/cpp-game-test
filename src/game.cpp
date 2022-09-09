@@ -31,9 +31,10 @@ void game::update() {
     auto [physics_val, transform_val] = entity->get<physics::physics, transform>();
     if (keyState[SDL_SCANCODE_LEFT]) {
       physics_val.force.x -= 0.01;
-    }
-    if (keyState[SDL_SCANCODE_RIGHT]) {
+    } else if (keyState[SDL_SCANCODE_RIGHT]) {
       physics_val.force.x += 0.01;
+    } else {
+      physics_val.force.x -= physics_val.velocity.x * 0.05 / physics_val.mass;
     }
     if (keyState[SDL_SCANCODE_SPACE]) {
       if (std::abs(physics_val.velocity.y) < 0.001) {
