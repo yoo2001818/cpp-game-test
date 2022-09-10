@@ -5,8 +5,7 @@
 #include "tile.hpp"
 #include "physics.hpp"
 #include "boundary.hpp"
-
-struct player {};
+#include "player.hpp"
 
 void game::init() {
   tile::loadTile(*this);
@@ -17,48 +16,16 @@ void game::init() {
     transform_val.position.y = 0;
     entity->set<physics::physics>();
     entity->set<boundary>();
-    entity->set<player>();
+    entity->set<player::player>();
   }
 }
 
 void game::update() {
-  int windowWidth, windowHeight;
-  SDL_GetRendererOutputSize(mRenderer, &windowWidth, &windowHeight);
-
-  auto query = mWorld.getQuery<player>();
-  const uint8_t* keyState = SDL_GetKeyboardState(nullptr);
-  for (auto entity : query) {
-    auto [physics_val, transform_val] = entity->get<physics::physics, transform>();
-    if (keyState[SDL_SCANCODE_LEFT]) {
-      physics_val.force.x -= 0.01;
-    } else if (keyState[SDL_SCANCODE_RIGHT]) {
-      physics_val.force.x += 0.01;
-    } else {
-      physics_val.force.x -= physics_val.velocity.x * 0.05 / physics_val.mass;
-    }
-    if (keyState[SDL_SCANCODE_SPACE]) {
-      if (std::abs(physics_val.velocity.y) < 0.001) {
-        physics_val.velocity.y = -0.3;
-      }
-    }
-  }
-
   tile::updateTile(*this);
   physics::updatePhysics(*this);
-
-  for (auto entity : query) {
-    auto [physics_val, transform_val] = entity->get<physics::physics, transform>();
-    mViewport.mTransform.position.x = transform_val.position.x - windowWidth / 2 / 36.0;
-    mViewport.mTransform.position.y = transform_val.position.y - windowHeight / 2 / 36.0;
-  }
+  player::updatePlayer(*this);
 
   SDL_PumpEvents();
-  int mouseX;
-  int mouseY;
-  SDL_GetMouseState(&mouseX, &mouseY);
-
-  // mViewport.mTransform.position.x = -(mouseX - windowWidth / 2) / 36.0;
-  // mViewport.mTransform.position.y = -(mouseY - windowHeight / 2) / 36.0;
 }
 
 void game::render() {
