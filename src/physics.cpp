@@ -20,7 +20,7 @@ void physics::updatePhysics(game& game) {
     // Apply net force to velocity & update position
     physics_val.velocity += physics_val.force / physics_val.mass;
     transform_val.position += physics_val.velocity;
-    physics_val.onGround = false;
+    physics_val.onGround += 1;
 
     // Collision check
     auto prev_velocity = physics_val.velocity;
@@ -59,7 +59,7 @@ void physics::updatePhysics(game& game) {
               physics_val.velocity.y = -prev_velocity.y * 0.1;
             }
             if (prev_velocity.y > 0.0) {
-              physics_val.onGround = true;
+              physics_val.onGround = -10;
             }
             // physics_val.velocity.x /= 1.0 + intersection_size.x * 0.2;
           } else {

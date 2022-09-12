@@ -14,8 +14,9 @@ void player::updatePlayer(game& game) {
       physics_val.force.x -= physics_val.velocity.x * 0.05 / physics_val.mass;
     }
     if (keyState[SDL_SCANCODE_SPACE]) {
-      if (physics_val.onGround) {
+      if (physics_val.onGround <= 0) {
         physics_val.velocity.y = -0.3;
+        physics_val.onGround = 1;
       }
     }
   }
