@@ -9,6 +9,10 @@ void physics::updatePhysics(game& game) {
   for (auto entity : query) {
     auto [physics_val, transform_val, boundary_val] = entity->get<physics, transform, boundary>();
 
+    if (physics_val.hasCollisionHandler) {
+      physics_val.collisions.clear();
+    }
+
     auto surface_size = glm::abs(boundary_val.rect.max - boundary_val.rect.min);
     // Gravity
     physics_val.force += glm::vec3(0., 0.3 / 60.0 * physics_val.mass, 0.);
