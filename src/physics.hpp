@@ -5,9 +5,13 @@
 #include <vector>
 
 #include "game.hpp"
+#include "entity.hpp"
 
 namespace physics {
-  struct collision {};
+  struct collision {
+    entity_id target;
+    glm::vec3 direction;
+  };
 
   struct physics {
     alignas(16) glm::vec3 velocity {0., 0., 0.};
