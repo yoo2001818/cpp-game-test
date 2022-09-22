@@ -76,6 +76,15 @@ void physics::updatePhysics(game& game) {
             // physics_val.velocity.y /= 1.0 + intersection_size.y * 0.2;
           }
           // TODO: Handle physics-physics object collision
+          if (physics_val.hasCollisionHandler) {
+            physics_val.collisions.push_back({ target_id, pos_diff });
+          }
+          if (target->has<physics>()) {
+            auto target_physics = target->get<physics>();
+            if (target_physics.hasCollisionHandler) {
+              target_physics.collisions.push_back({ entity->getId(), -pos_diff });
+            }
+          }
         }
       }
     }
