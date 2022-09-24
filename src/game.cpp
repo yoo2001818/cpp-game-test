@@ -14,7 +14,8 @@ void game::init() {
     auto& transform_val = entity->set<transform>();
     transform_val.position.x = 10.5;
     transform_val.position.y = 0;
-    entity->set<physics::physics>();
+    auto& physics_val = entity->set<physics::physics>();
+    physics_val.hasCollisionHandler = true;
     entity->set<boundary>();
     entity->set<player::player>();
   }
@@ -54,6 +55,25 @@ void game::render() {
     rect.h = 36;
     SDL_SetRenderDrawColor(mRenderer, 255, 0, 0, 255);
     SDL_RenderFillRect(mRenderer, &rect);
+  }
+
+  // Render collisions
+  for (auto entity : mWorld) {
+    auto transform_val = entity->try_get<transform>();
+    auto physics_val = entity->try_get<physics::physics>();
+    if (transform_val == nullptr || physics_val == nullptr) {
+      continue;
+    }
+    for (auto collision : physics_val->collisions) {
+      SDL_SetRenderDrawColor(mRenderer, 0, 0, 255, 255);
+      SDL_RenderDrawLineF(
+        mRenderer,
+        (transform_val->position.x - offsetX) * 36.0,
+        (transform_val->position.y - offsetY) * 36.0,
+        (transform_val->position.x - offsetX + collision.direction.x) * 36.0,
+        (transform_val->position.y - offsetY + collision.direction.y) * 36.0
+      );
+    }
   }
 
   // Render "minimap" on the rendered list
