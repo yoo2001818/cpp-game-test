@@ -19,6 +19,16 @@ void game::init() {
     entity->set<boundary>();
     entity->set<player::player>();
   }
+  {
+    // box
+    auto entity = mWorld.create();
+    auto& transform_val = entity->set<transform>();
+    transform_val.position.x = 13.5;
+    transform_val.position.y = 0;
+    auto& physics_val = entity->set<physics::physics>();
+    physics_val.hasCollisionHandler = true;
+    entity->set<boundary>();
+  }
 }
 
 void game::update() {

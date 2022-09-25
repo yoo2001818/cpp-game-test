@@ -77,6 +77,7 @@ void world::updateIndex() {
   while (!this->mDirtyEntityList.empty()) {
     entity_id& id = this->mDirtyEntityList.top();
     mTileIndex.update(id);
+    this->get(id)->mIsDirty = false;
     this->mDirtyEntityList.pop();
   }
 }
