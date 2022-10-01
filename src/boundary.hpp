@@ -5,8 +5,14 @@
 #include "transform.hpp"
 
 class boundary {
+  enum shape {
+    circle,
+    rectangle,
+    capsule
+  };
   public:
   ::rect rect;
+  shape shape;
 
   ::rect getWorldRect(const transform& transform);
 };
