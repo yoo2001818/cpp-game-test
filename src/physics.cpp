@@ -53,8 +53,32 @@ void physics::updatePhysics(game& game) {
           auto intersection = world_rect.intersectRect(target_rect);
           if (!intersection.has_value()) continue;
           auto intersection_rect = intersection.value();
-          // Move to the opposite direction to avoid collision
+          // Determine the collided edge
+          glm::vec3 normal;
           auto intersection_size = intersection_rect.max - intersection_rect.min;
+          // TODO: This should be changed to comparing each entity's velocity;
+          // as it can fail when the entities collide at corner.
+          // However it should be noted that only using velocity will also fail
+          // because position may be updated by other objects without touching
+          // the velocity.
+          if (intersection_size.x < intersection_size.y) {
+            if (world_rect.max.x < target_rect.min.x) {
+              // Left
+              normal = glm::vec3(-1.0, 0.0, 0.0);
+            } else if (world_rect.min.x < target_rect.max.x) {
+              // Right
+              normal = glm::vec3(1.0, 0.0, 0.0);
+            }
+          } else {
+            if (world_rect.max.y < target_rect.min.y) {
+              // Bottom
+              normal = glm::vec3(0.0, -1.0, 0.0);
+            } else if (world_rect.min.y < target_rect.max.y) {
+              // Top
+              normal = glm::vec3(0.0, 1.0, 0.0);
+            }
+          }
+          // Move to the opposite direction to avoid collision
           if (intersection_size.y < intersection_size.x) {
             transform_val.position.y -= glm::sign(pos_diff.y) * intersection_size.y;
             if (glm::abs(prev_velocity.y) < 0.01) {
