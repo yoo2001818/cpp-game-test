@@ -47,8 +47,15 @@ void physics::updatePhysics(game& game) {
           if (target_id == entity->getId()) continue;
           auto target = game.mWorld.get(target_id);
           auto [target_transform, target_boundary] = target->get<transform, boundary>();
+          auto target_physics = target->try_get<physics>();
           auto target_rect = target_boundary.getWorldRect(target_transform);
           auto pos_diff = target_transform.position - prev_position;
+          glm::vec3 velocity_diff;
+          if (target_physics != nullptr) {
+            velocity_diff = physics_val.velocity - target_physics->velocity;
+          } else {
+            velocity_diff = physics_val.velocity;
+          }
           // Run collision check...
           auto intersection = world_rect.intersectRect(target_rect);
           if (!intersection.has_value()) continue;
@@ -56,27 +63,28 @@ void physics::updatePhysics(game& game) {
           // Determine the collided edge
           glm::vec3 normal;
           auto intersection_size = intersection_rect.max - intersection_rect.min;
-          // TODO: This should be changed to comparing each entity's velocity;
-          // as it can fail when the entities collide at corner.
-          // However it should be noted that only using velocity will also fail
-          // because position may be updated by other objects without touching
-          // the velocity.
           if (intersection_size.x < intersection_size.y) {
-            if (world_rect.max.x < target_rect.min.x) {
+            // |     |  |    |
+            // c     o  c    o
+            if (world_rect.max.x > target_rect.min.x) {
               // Left
               normal = glm::vec3(-1.0, 0.0, 0.0);
-            } else if (world_rect.min.x < target_rect.max.x) {
+            } else {
               // Right
               normal = glm::vec3(1.0, 0.0, 0.0);
             }
           } else {
-            if (world_rect.max.y < target_rect.min.y) {
+            if (world_rect.max.y > target_rect.min.y) {
               // Bottom
               normal = glm::vec3(0.0, -1.0, 0.0);
-            } else if (world_rect.min.y < target_rect.max.y) {
+            } else {
               // Top
               normal = glm::vec3(0.0, 1.0, 0.0);
             }
+          }
+          // Check if the collision should continue (is the entities colliding?)
+          if (glm::dot(velocity_diff, normal) >= 0.0) {
+            continue;
           }
           // Move to the opposite direction to avoid collision
           if (intersection_size.y < intersection_size.x) {
