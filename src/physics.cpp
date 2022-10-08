@@ -64,22 +64,20 @@ void physics::updatePhysics(game& game) {
           glm::vec3 normal;
           auto intersection_size = intersection_rect.max - intersection_rect.min;
           if (intersection_size.x < intersection_size.y) {
-            // |     |  |    |
-            // c     o  c    o
-            if (world_rect.max.x > target_rect.min.x) {
-              // Left
-              normal = glm::vec3(-1.0, 0.0, 0.0);
-            } else {
-              // Right
+            if (target_rect.min.x < world_rect.min.x) {
+              // (target is on the) left
               normal = glm::vec3(1.0, 0.0, 0.0);
+            } else {
+              // right
+              normal = glm::vec3(-1.0, 0.0, 0.0);
             }
           } else {
-            if (world_rect.max.y > target_rect.min.y) {
-              // Bottom
-              normal = glm::vec3(0.0, -1.0, 0.0);
-            } else {
-              // Top
+            if (target_rect.min.y < world_rect.min.y) {
+              // (target is on the) bottom (note that we didn't flip axis yet)
               normal = glm::vec3(0.0, 1.0, 0.0);
+            } else {
+              // (target is on the) top
+              normal = glm::vec3(0.0, -1.0, 0.0);
             }
           }
           // Check if the collision should continue (is the entities colliding?)
@@ -88,25 +86,17 @@ void physics::updatePhysics(game& game) {
           }
           // Move to the opposite direction to avoid collision
           if (intersection_size.y < intersection_size.x) {
-            transform_val.position.y -= glm::sign(pos_diff.y) * intersection_size.y;
-            if (glm::abs(prev_velocity.y) < 0.01) {
-              physics_val.velocity.y = 0.0;
-            } else {
-              physics_val.velocity.y = -prev_velocity.y * 0.1;
-            }
-            if (prev_velocity.y > 0.0) {
-              physics_val.onGround = -10;
-            }
-            // physics_val.velocity.x /= 1.0 + intersection_size.x * 0.2;
+            transform_val.position -= physics_val.velocity * intersection_size.y;
           } else {
-            transform_val.position.x -= glm::sign(pos_diff.x) * intersection_size.x;
-            if (glm::abs(prev_velocity.x) < 0.01) {
-              physics_val.velocity.x = 0.0;
-            } else {
-              physics_val.velocity.x = -prev_velocity.x * 0.1;
-            }
-            // physics_val.velocity.y /= 1.0 + intersection_size.y * 0.2;
+            transform_val.position -= physics_val.velocity * intersection_size.x;
           }
+          /*
+          // Calculate impact energy
+          auto vrn = glm::dot(physics_val.velocity, normal);
+          float impact_energy = -vrn * (1.1) * physics_val.mass;
+          auto fi = normal * impact_energy / 60.0F;
+          physics_val.velocity += fi / physics_val.mass;
+          */
           // TODO: Handle physics-physics object collision
           if (physics_val.hasCollisionHandler) {
             physics_val.collisions.push_back({ target_id, pos_diff });
