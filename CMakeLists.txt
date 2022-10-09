@@ -19,7 +19,7 @@ FetchContent_Declare(
   GIT_TAG        v3.0.1
 )
 
-FetchContent_MakeAvailable(Catch2)
+# FetchContent_MakeAvailable(Catch2)
 
 add_compile_options(-fsanitize=address)
 add_link_options(-fsanitize=address)
@@ -35,11 +35,11 @@ add_executable(CppGameTest ${SOURCES})
 target_link_libraries(CppGameTest ${SDL2_LIBRARIES})
 target_link_libraries(CppGameTest ${SDL2_IMAGE_LIBRARIES})
 
-file(GLOB TEST_SOURCES ${PROJECT_SOURCE_DIR}/test/*.cpp)
-list(APPEND TEST_SOURCES ${SOURCES})
-list(REMOVE_ITEM TEST_SOURCES ${PROJECT_SOURCE_DIR}/src/main.cpp)
-add_executable(CppGameTestTest ${TEST_SOURCES})
-target_link_libraries(CppGameTestTest ${SDL2_LIBRARIES})
-target_link_libraries(CppGameTestTest ${SDL2_IMAGE_LIBRARIES})
-target_link_libraries(CppGameTestTest Catch2::Catch2WithMain)
+# file(GLOB TEST_SOURCES ${PROJECT_SOURCE_DIR}/test/*.cpp)
+# list(APPEND TEST_SOURCES ${SOURCES})
+# list(REMOVE_ITEM TEST_SOURCES ${PROJECT_SOURCE_DIR}/src/main.cpp)
+# add_executable(CppGameTestTest ${TEST_SOURCES})
+# target_link_libraries(CppGameTestTest ${SDL2_LIBRARIES})
+# target_link_libraries(CppGameTestTest ${SDL2_IMAGE_LIBRARIES})
+# target_link_libraries(CppGameTestTest Catch2::Catch2WithMain)
 

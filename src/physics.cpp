@@ -78,6 +78,7 @@ void physics::updatePhysics(game& game) {
             } else {
               // (target is on the) top
               normal = glm::vec3(0.0, -1.0, 0.0);
+              physics_val.onGround = -10;
             }
           }
           // Check if the collision should continue (is the entities colliding?)
@@ -86,17 +87,15 @@ void physics::updatePhysics(game& game) {
           }
           // Move to the opposite direction to avoid collision
           if (intersection_size.y < intersection_size.x) {
-            transform_val.position -= physics_val.velocity * intersection_size.y;
+            transform_val.position -= physics_val.velocity * (intersection_size.y / physics_val.velocity.y);
           } else {
-            transform_val.position -= physics_val.velocity * intersection_size.x;
+            transform_val.position -= physics_val.velocity * (intersection_size.x / physics_val.velocity.x);
           }
-          /*
           // Calculate impact energy
           auto vrn = glm::dot(physics_val.velocity, normal);
-          float impact_energy = -vrn * (1.1) * physics_val.mass;
-          auto fi = normal * impact_energy / 60.0F;
+          float impact_energy = -vrn * (1.5) * physics_val.mass;
+          auto fi = normal * impact_energy;
           physics_val.velocity += fi / physics_val.mass;
-          */
           // TODO: Handle physics-physics object collision
           if (physics_val.hasCollisionHandler) {
             physics_val.collisions.push_back({ target_id, pos_diff });
