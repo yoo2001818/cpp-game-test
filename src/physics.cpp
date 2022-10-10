@@ -13,13 +13,17 @@ void physics::updatePhysics(game& game) {
       physics_val.collisions.clear();
     }
 
-    auto surface_size = glm::abs(boundary_val.rect.max - boundary_val.rect.min);
-    // Gravity
-    physics_val.force += glm::vec3(0., 0.3 / 60.0 * physics_val.mass, 0.);
-    // Air resistance
-    physics_val.force -=
-      glm::sign(physics_val.velocity) *
-      physics_val.velocity * physics_val.velocity * surface_size * glm::vec3(0.5 * 0.8, 0.5 * 0.3, 1.0);
+    if (physics_val.hasCollision) {
+      physics_val.hasCollision = false;
+    } else {
+      auto surface_size = glm::abs(boundary_val.rect.max - boundary_val.rect.min);
+      // Gravity
+      physics_val.force += glm::vec3(0., 0.3 / 60.0 * physics_val.mass, 0.);
+      // Air resistance
+      physics_val.force -=
+        glm::sign(physics_val.velocity) *
+        physics_val.velocity * physics_val.velocity * surface_size * glm::vec3(0.5 * 0.8, 0.5 * 0.3, 1.0);
+    }
 
     // Apply net force to velocity & update position
     physics_val.velocity += physics_val.force / physics_val.mass;
@@ -100,18 +104,22 @@ void physics::updatePhysics(game& game) {
           if (physics_val.hasCollisionHandler) {
             physics_val.collisions.push_back({ target_id, pos_diff });
           }
+          physics_val.hasCollision = true;
           if (target->has<physics>()) {
             auto target_physics = target->get<physics>();
             if (target_physics.hasCollisionHandler) {
               target_physics.collisions.push_back({ entity->getId(), -pos_diff });
             }
+            target_physics.hasCollision = true;
           }
         }
       }
     }
 
-    // Reset force for next loop
-    physics_val.force = glm::vec3(0.0);
+    if (!physics_val.hasCollision) {
+      // Reset force for next loop
+      physics_val.force = glm::vec3(0.0);
+    }
 
     // Update collision grid right away
     game.mWorld.markDirty(*entity);

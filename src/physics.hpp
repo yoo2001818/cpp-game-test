@@ -18,6 +18,7 @@ namespace physics {
     alignas(16) glm::vec3 force {0., 0., 0.};
     float mass = 1;
     int onGround = 0;
+    bool hasCollision = false;
     bool hasCollisionHandler = false;
     std::vector<collision> collisions;
   };
