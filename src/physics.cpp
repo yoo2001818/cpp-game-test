@@ -27,12 +27,11 @@ void physics::updatePhysics(game& game) {
 
     // Apply net force to velocity & update position
     physics_val.velocity += physics_val.force / physics_val.mass;
+    physics_val.force = glm::vec3(0.0);
     transform_val.position += physics_val.velocity;
     physics_val.onGround += 1;
 
     // Collision check
-    auto prev_velocity = physics_val.velocity;
-    auto prev_position = transform_val.position;
     auto world_rect = boundary_val.getWorldRect(transform_val);
     tile_index::tile min {
       static_cast<int32_t>(std::floor(world_rect.min.x)),
@@ -53,7 +52,7 @@ void physics::updatePhysics(game& game) {
           auto [target_transform, target_boundary] = target->get<transform, boundary>();
           auto target_physics = target->try_get<physics>();
           auto target_rect = target_boundary.getWorldRect(target_transform);
-          auto pos_diff = target_transform.position - prev_position;
+          auto pos_diff = target_transform.position - transform_val.position;
           glm::vec3 velocity_diff;
           if (target_physics != nullptr) {
             velocity_diff = physics_val.velocity - target_physics->velocity;
@@ -99,7 +98,7 @@ void physics::updatePhysics(game& game) {
           auto vrn = glm::dot(physics_val.velocity, normal);
           float impact_energy = -vrn * (1.5) * physics_val.mass;
           auto fi = normal * impact_energy;
-          physics_val.velocity += fi / physics_val.mass;
+          physics_val.force += fi;
           // TODO: Handle physics-physics object collision
           if (physics_val.hasCollisionHandler) {
             physics_val.collisions.push_back({ target_id, pos_diff });
@@ -114,11 +113,6 @@ void physics::updatePhysics(game& game) {
           }
         }
       }
-    }
-
-    if (!physics_val.hasCollision) {
-      // Reset force for next loop
-      physics_val.force = glm::vec3(0.0);
     }
 
     // Update collision grid right away
