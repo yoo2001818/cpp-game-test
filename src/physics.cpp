@@ -85,7 +85,7 @@ void physics::updatePhysics(game& game) {
             }
           }
           // Check if the collision should continue (is the entities colliding?)
-          if (glm::dot(velocity_diff, normal) >= 0.0) {
+          if (glm::dot(velocity_diff, normal) >= 0.0 || physics_val.hasCollision) {
             continue;
           }
           // Move to the opposite direction to avoid collision
