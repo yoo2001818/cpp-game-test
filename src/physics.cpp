@@ -85,7 +85,7 @@ void physics::updatePhysics(game& game) {
             }
           }
           // Check if the collision should continue (is the entities colliding?)
-          if (glm::dot(velocity_diff, normal) >= 0.0 || physics_val.hasCollision) {
+          if (glm::dot(velocity_diff, normal) >= 0.0) {
             continue;
           }
           // Move to the opposite direction to avoid collision
@@ -94,6 +94,7 @@ void physics::updatePhysics(game& game) {
           } else {
             transform_val.position -= physics_val.velocity * (intersection_size.x / physics_val.velocity.x);
           }
+          world_rect = boundary_val.getWorldRect(transform_val);
           // Calculate impact energy
           auto vrn = glm::dot(physics_val.velocity, normal);
           float impact_energy = -vrn * (1.5) * physics_val.mass;
