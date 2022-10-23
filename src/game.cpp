@@ -74,6 +74,14 @@ void game::render() {
     if (transform_val == nullptr || physics_val == nullptr) {
       continue;
     }
+    SDL_SetRenderDrawColor(mRenderer, 0, 128, 128, 255);
+    SDL_RenderDrawLineF(
+      mRenderer,
+      (transform_val->position.x - offsetX) * 36.0,
+      (transform_val->position.y - offsetY) * 36.0,
+      (transform_val->position.x - offsetX + physics_val->velocity.x * 5.0) * 36.0,
+      (transform_val->position.y - offsetY + physics_val->velocity.y * 5.0) * 36.0
+    );
     for (auto collision : physics_val->collisions) {
       SDL_SetRenderDrawColor(mRenderer, 0, 0, 255, 255);
       SDL_RenderDrawLineF(

@@ -89,11 +89,18 @@ void physics::updatePhysics(game& game) {
             continue;
           }
           // Move to the opposite direction to avoid collision
+          glm::vec3 move_diff;
           if (intersection_size.y < intersection_size.x) {
-            transform_val.position -= physics_val.velocity * (intersection_size.y / physics_val.velocity.y);
+            move_diff = physics_val.velocity * (intersection_size.y / physics_val.velocity.y);
           } else {
-            transform_val.position -= physics_val.velocity * (intersection_size.x / physics_val.velocity.x);
+            move_diff = physics_val.velocity * (intersection_size.x / physics_val.velocity.x);
           }
+          if (glm::length(move_diff) > 0.5f) {
+            std::cout << "Object moved too much; " << move_diff.x << ", " << move_diff.y << std::endl;
+            std::cout << "velocity: " << physics_val.velocity.x << ", " << physics_val.velocity.y << std::endl;
+            std::cout << "intersection: " << intersection_size.x << ", " << intersection_size.y << std::endl;
+          }
+          transform_val.position -= move_diff;
           world_rect = boundary_val.getWorldRect(transform_val);
           // Calculate impact energy
           auto vrn = glm::dot(physics_val.velocity, normal);
