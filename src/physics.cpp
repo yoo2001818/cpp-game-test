@@ -64,9 +64,45 @@ void physics::updatePhysics(game& game) {
           if (!intersection.has_value()) continue;
           auto intersection_rect = intersection.value();
           // Determine the collided edge
+          
+          // This is extremely tricky because without enough information, it is
+          // easy to wrongly determine the collided side.
+          // For example, if the object collided at the corner from the top,
+          // it could be detected as it collided with the right/left. Instead
+          // of pushing the object to top, it will push the object to the side,
+          // making the object move abruptly to other direction.
+
+          // To prevent this behavior, we need to put the object velocity
+          // (or the difference between the current position and the previous
+          // position... which is velocity.) in account.
+
+          // Instead of using collision box size to determine the collided
+          // position, we can solely depend on the velocity to determine the
+          // collided edge.
+
+          //  |     |
+          //  |  1  |   --->
+          //  |     |   |     |
+          //            |  2  |
+          //            |     |
+
+          // If 1 and 2 collides, the normal will be LEFT from 1's view,
+          // and RIGHT from 2's view. (Because each object should move along 
+          // that direction)
+
+          // However this is also flawed as well, as it will report wrong
+          // direction when the object is sliding along the edge on other
+          // object. ... We need BOTH logic to determine the position!
+
+          // Using the velocity to determine the previous position, it basically
+          // boils to this problem: While continously moving the object from
+          // the previous position to current position, which edge gets collided
+          // first?
+
           glm::vec3 normal;
+          auto velocity_diff_abs = glm::abs(velocity_diff);
           auto intersection_size = intersection_rect.max - intersection_rect.min;
-          if (intersection_size.x < intersection_size.y) {
+          if (velocity_diff_abs.x > velocity_diff_abs.y) {
             if (target_rect.min.x < world_rect.min.x) {
               // (target is on the) left
               normal = glm::vec3(1.0, 0.0, 0.0);
