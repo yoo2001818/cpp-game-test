@@ -99,11 +99,22 @@ void physics::updatePhysics(game& game) {
           // the previous position to current position, which edge gets collided
           // first?
 
-          glm::vec3 normal;
-          auto velocity_diff_abs = glm::abs(velocity_diff);
+          // The answer can be simply derived - If we were to cancel the
+          // each object's movement to the exact point where they collide -
+          // which edge would result in smaller movement?
+          
           auto intersection_size = intersection_rect.max - intersection_rect.min;
-          if (velocity_diff_abs.x > velocity_diff_abs.y) {
-            if (target_rect.min.x < world_rect.min.x) {
+          auto move_diff_ratio = intersection_size / physics_val.velocity;
+
+          glm::vec3 normal;
+          glm::vec3 move_diff;
+          auto move_diff_abs = glm::abs(move_diff_ratio);
+          // Compare midpoint
+          auto target_mid = (target_rect.min + target_rect.max) / 2.0f;
+          auto world_mid = (world_rect.min + world_rect.max) / 2.0f;
+          if (move_diff_abs.x < move_diff_abs.y) {
+            move_diff = physics_val.velocity * move_diff_ratio.x;
+            if (target_mid.x < world_mid.x) {
               // (target is on the) left
               normal = glm::vec3(1.0, 0.0, 0.0);
             } else {
@@ -111,7 +122,8 @@ void physics::updatePhysics(game& game) {
               normal = glm::vec3(-1.0, 0.0, 0.0);
             }
           } else {
-            if (target_rect.min.y < world_rect.min.y) {
+            move_diff = physics_val.velocity * move_diff_ratio.y;
+            if (target_mid.y < world_mid.y) {
               // (target is on the) bottom (note that we didn't flip axis yet)
               normal = glm::vec3(0.0, 1.0, 0.0);
             } else {
@@ -125,12 +137,6 @@ void physics::updatePhysics(game& game) {
             continue;
           }
           // Move to the opposite direction to avoid collision
-          glm::vec3 move_diff;
-          if (intersection_size.y < intersection_size.x) {
-            move_diff = physics_val.velocity * (intersection_size.y / physics_val.velocity.y);
-          } else {
-            move_diff = physics_val.velocity * (intersection_size.x / physics_val.velocity.x);
-          }
           if (glm::length(move_diff) > 0.5f) {
             std::cout << "Object moved too much; " << move_diff.x << ", " << move_diff.y << std::endl;
             std::cout << "velocity: " << physics_val.velocity.x << ", " << physics_val.velocity.y << std::endl;
