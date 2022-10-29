@@ -32,9 +32,12 @@ void game::init() {
 }
 
 void game::update() {
-  tile::updateTile(*this);
-  physics::updatePhysics(*this);
-  player::updatePlayer(*this);
+  if (!this->mPaused || this->mShouldStep) {
+    tile::updateTile(*this);
+    physics::updatePhysics(*this);
+    player::updatePlayer(*this);
+    this->mShouldStep = false;
+  }
 
   SDL_PumpEvents();
 }
@@ -113,4 +116,17 @@ void game::render() {
 }
 
 void game::handleEvent(const SDL_Event& event) {
+  switch (event.type) {
+    case SDL_EventType::SDL_KEYDOWN: {
+      switch (event.key.keysym.sym) {
+        case SDLK_ESCAPE:
+          this->mPaused = !this->mPaused;
+          break;
+        case SDLK_e:
+          this->mShouldStep = true;
+          break;
+      }
+      break;
+    }
+  }
 }

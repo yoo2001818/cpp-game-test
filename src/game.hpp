@@ -11,9 +11,11 @@ class game {
   public:
   world mWorld;
   viewport mViewport;
+  bool mPaused;
+  bool mShouldStep;
   SDL_Renderer *mRenderer;
 
-  game(SDL_Renderer *renderer): mWorld(), mRenderer(renderer) {}
+  game(SDL_Renderer *renderer): mWorld(), mRenderer(renderer), mPaused(false), mShouldStep(false) {}
 
   void init();
   void update();
