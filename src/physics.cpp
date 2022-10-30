@@ -145,19 +145,20 @@ void physics::updatePhysics(game& game) {
           transform_val.position -= move_diff;
           world_rect = boundary_val.getWorldRect(transform_val);
           // Calculate impact energy
-          auto vrn = glm::dot(physics_val.velocity, normal);
+          auto vrn = glm::dot(velocity_diff, normal);
           float impact_energy = -vrn * (1.5) * physics_val.mass;
           auto fi = normal * impact_energy;
           physics_val.force += fi;
           // TODO: Handle physics-physics object collision
+          auto intersection_mid = (intersection_rect.min + intersection_rect.max) / 2.0f;
           if (physics_val.hasCollisionHandler) {
-            physics_val.collisions.push_back({ target_id, pos_diff });
+            physics_val.collisions.push_back({ target_id, normal, intersection_mid });
           }
           physics_val.hasCollision = true;
           if (target->has<physics>()) {
             auto target_physics = target->get<physics>();
             if (target_physics.hasCollisionHandler) {
-              target_physics.collisions.push_back({ entity->getId(), -pos_diff });
+              target_physics.collisions.push_back({ entity->getId(), -normal, intersection_mid });
             }
             target_physics.hasCollision = true;
           }

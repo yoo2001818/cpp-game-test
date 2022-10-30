@@ -19,7 +19,7 @@ void game::init() {
     entity->set<boundary>();
     entity->set<player::player>();
   }
-  {
+  /* {
     // box
     auto entity = mWorld.create();
     auto& transform_val = entity->set<transform>();
@@ -28,7 +28,7 @@ void game::init() {
     auto& physics_val = entity->set<physics::physics>();
     physics_val.hasCollisionHandler = true;
     entity->set<boundary>();
-  }
+  } */
 }
 
 void game::update() {
@@ -87,12 +87,20 @@ void game::render() {
     );
     for (auto collision : physics_val->collisions) {
       SDL_SetRenderDrawColor(mRenderer, 0, 0, 255, 255);
+      SDL_Rect rect {
+        (collision.position.x - offsetX) * 36.0 - 8,
+        (collision.position.y - offsetY) * 36.0 - 8,
+        16,
+        16
+      };
+      SDL_RenderFillRect(mRenderer, &rect);
+      SDL_SetRenderDrawColor(mRenderer, 0, 0, 255, 255);
       SDL_RenderDrawLineF(
         mRenderer,
-        (transform_val->position.x - offsetX) * 36.0,
-        (transform_val->position.y - offsetY) * 36.0,
-        (transform_val->position.x - offsetX + collision.direction.x) * 36.0,
-        (transform_val->position.y - offsetY + collision.direction.y) * 36.0
+        rect.x,
+        rect.y,
+        rect.x + collision.direction.x * 36.0,
+        rect.y + collision.direction.y * 36.0
       );
     }
   }
