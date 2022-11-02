@@ -8,6 +8,13 @@
 #include "entity.hpp"
 
 namespace physics {
+  struct collision2 {
+    entity_id target1;
+    entity_id target2;
+    glm::vec3 direction;
+    glm::vec3 position;
+  };
+
   struct collision {
     entity_id target;
     glm::vec3 direction;
