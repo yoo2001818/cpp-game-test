@@ -7,6 +7,7 @@
 void physics::updatePhysics(game& game) {
   auto query = game.mWorld.getQuery<physics, transform, boundary>();
   std::vector<collision2> collisions;
+  // Collision check phase
   for (auto entity : query) {
     auto [physics_val, transform_val, boundary_val] = entity->get<physics, transform, boundary>();
 
@@ -165,6 +166,11 @@ void physics::updatePhysics(game& game) {
           }
         }
       }
+    }
+
+    // Collision update phase
+    for (auto collision : collisions) {
+      // Calculate impulse, update velocity/position, etc
     }
 
     // Update collision grid right away
