@@ -15,23 +15,20 @@ void physics::updatePhysics(game& game) {
       physics_val.collisions.clear();
     }
 
-    if (physics_val.hasCollision) {
-      physics_val.hasCollision = false;
-    } else {
-      auto surface_size = glm::abs(boundary_val.rect.max - boundary_val.rect.min);
-      // Gravity
-      physics_val.force += glm::vec3(0., 0.3 / 60.0 * physics_val.mass, 0.);
-      // Air resistance
-      physics_val.force -=
-        glm::sign(physics_val.velocity) *
-        physics_val.velocity * physics_val.velocity * surface_size * glm::vec3(0.5 * 0.8, 0.5 * 0.3, 1.0);
-    }
-
     // Apply net force to velocity & update position
     physics_val.velocity += physics_val.force / physics_val.mass;
-    physics_val.force = glm::vec3(0.0);
     transform_val.position += physics_val.velocity;
     physics_val.onGround += 1;
+
+    physics_val.force = glm::vec3(0.0);
+    
+    auto surface_size = glm::abs(boundary_val.rect.max - boundary_val.rect.min);
+    // Gravity
+    physics_val.force += glm::vec3(0., 0.3 / 60.0 * physics_val.mass, 0.);
+    // Air resistance
+    physics_val.force -=
+      glm::sign(physics_val.velocity) *
+      physics_val.velocity * physics_val.velocity * surface_size * glm::vec3(0.5 * 0.8, 0.5 * 0.3, 1.0);
 
     // Collision check
     auto world_rect = boundary_val.getWorldRect(transform_val);
