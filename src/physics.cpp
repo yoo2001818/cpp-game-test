@@ -101,6 +101,9 @@ void physics::updatePhysics(game& game) {
           // The answer can be simply derived - If we were to cancel the
           // each object's movement to the exact point where they collide -
           // which edge would result in smaller movement?
+
+          // ... It doesn't work. We need robust tests to handle all AABB
+          // collision case to determine correct collision vectors.
           
           auto intersection_size = intersection_rect.max - intersection_rect.min;
           auto move_diff_ratio = intersection_size / physics_val.velocity;
