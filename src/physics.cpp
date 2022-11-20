@@ -7,6 +7,19 @@
 void physics::updatePhysics(game& game) {
   auto query = game.mWorld.getQuery<physics, transform, boundary>();
   std::vector<collision2> collisions;
+
+  // The collision process routine is as follows:
+  //
+  // 1. Update force, velocity, position
+  // 2. Check for collision, and mark the following for each collision:
+  //    - Entity # (A, B)
+  //    - Normal (A -> B)
+  //    - Penetration vector (A -> B)
+  //    - Impact energy
+  // 3. For each collision, move entities around and apply impact force
+  //    - Unwind penetration
+  //    - Apply impact energy
+
   // Collision check phase
   for (auto entity : query) {
     auto [physics_val, transform_val, boundary_val] = entity->get<physics, transform, boundary>();
