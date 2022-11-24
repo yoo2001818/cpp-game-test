@@ -4,6 +4,26 @@
 #include "transform.hpp"
 #include "boundary.hpp"
 
+std::optional<glm::vec3> intersectRectRect(
+  rect a_bounds,
+  rect b_bounds
+) {
+  // - Vertical collision takes precedence
+  // - We assume that only A moves (B is treated as a rectangle, A is treated as a line)
+
+  //      A        +
+  // ---+---+----
+  //    | B |  ^   -
+  //    +---+  |
+  auto y_max = a_bounds.max.y - b_bounds.min.y;
+
+  //    +---+  |
+  //    | B |  v   -
+  // ---+---+----
+  //      A        +
+  auto y_min = b_bounds.max.y - a_bounds.min.y;
+}
+
 void physics::updatePhysics(game& game) {
   auto query = game.mWorld.getQuery<physics, transform, boundary>();
   std::vector<collision2> collisions;
@@ -20,28 +40,31 @@ void physics::updatePhysics(game& game) {
   //    - Unwind penetration
   //    - Apply impact energy
 
-  // Collision check phase
+  float step_size = 1.0 / 60.0;
+
+  // Movement phase
   for (auto entity : query) {
     auto [physics_val, transform_val, boundary_val] = entity->get<physics, transform, boundary>();
 
-    if (physics_val.hasCollisionHandler) {
-      physics_val.collisions.clear();
-    }
-
-    // Apply net force to velocity & update position
     physics_val.velocity += physics_val.force / physics_val.mass;
-    transform_val.position += physics_val.velocity;
+    transform_val.position += physics_val.velocity * step_size;
     physics_val.onGround += 1;
 
+    // Reset previous force
     physics_val.force = glm::vec3(0.0);
     
     auto surface_size = glm::abs(boundary_val.rect.max - boundary_val.rect.min);
     // Gravity
-    physics_val.force += glm::vec3(0., 0.3 / 60.0 * physics_val.mass, 0.);
+    physics_val.force += glm::vec3(0., 0.3 * physics_val.mass * step_size, 0.);
     // Air resistance
     physics_val.force -=
       glm::sign(physics_val.velocity) *
-      physics_val.velocity * physics_val.velocity * surface_size * glm::vec3(0.5 * 0.8, 0.5 * 0.3, 1.0);
+      physics_val.velocity * physics_val.velocity * surface_size * glm::vec3(0.5 * 0.8, 0.5 * 0.3, 1.0) * step_size;
+  }
+
+  // Collision check phase
+  for (auto entity : query) {
+    auto [physics_val, transform_val, boundary_val] = entity->get<physics, transform, boundary>();
 
     // Collision check
     auto world_rect = boundary_val.getWorldRect(transform_val);
@@ -71,6 +94,7 @@ void physics::updatePhysics(game& game) {
           } else {
             velocity_diff = physics_val.velocity;
           }
+          /*
           // Run collision check...
           auto intersection = world_rect.intersectRect(target_rect);
           if (!intersection.has_value()) continue;
@@ -177,6 +201,7 @@ void physics::updatePhysics(game& game) {
             }
             target_physics.hasCollision = true;
           }
+          */
         }
       }
     }
