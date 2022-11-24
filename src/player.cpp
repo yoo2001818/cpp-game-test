@@ -7,15 +7,15 @@ void player::updatePlayer(game& game) {
   for (auto entity : query) {
     auto [physics_val, transform_val] = entity->get<physics::physics, transform>();
     if (keyState[SDL_SCANCODE_LEFT]) {
-      physics_val.force.x -= 0.01;
+      physics_val.force.x -= 0.6;
     } else if (keyState[SDL_SCANCODE_RIGHT]) {
-      physics_val.force.x += 0.01;
+      physics_val.force.x += 0.6;
     } else {
-      physics_val.force.x -= physics_val.velocity.x * 0.05 / physics_val.mass;
+      physics_val.force.x -= physics_val.velocity.x * 0.06 / physics_val.mass;
     }
     if (keyState[SDL_SCANCODE_SPACE]) {
       if (physics_val.onGround <= 0) {
-        physics_val.velocity.y = -0.3;
+        physics_val.velocity.y = -18.0;
         physics_val.onGround = 1;
       }
     }

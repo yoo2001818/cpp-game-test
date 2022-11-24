@@ -22,6 +22,44 @@ std::optional<glm::vec3> intersectRectRect(
   // ---+---+----
   //      A        +
   auto y_min = b_bounds.max.y - a_bounds.min.y;
+
+  // |  A  |
+  //       |  B  |
+  // 
+  //       + <-> -
+  auto x_max = a_bounds.max.x - b_bounds.min.x;
+
+  //       |  A  |
+  // |  B  |
+  // 
+  // - <-> +
+  auto x_min = b_bounds.max.x - a_bounds.min.x;
+
+  // Horizontal collision
+  // (We require some tolerance to avoid horizontal collision to wrongly occur)
+  const auto TOLERANCE_X = 0.3;
+  if (y_max >= TOLERANCE_X && y_min >= TOLERANCE_X) {
+    if (x_max >= 0.0 && x_min > x_max) {
+      return glm::vec3(-x_max, 0.0, 0.0);
+    } else if (x_min >= 0.0 && x_max > x_min) {
+      return glm::vec3(x_min, 0.0, 0.0);
+    }
+  }
+
+  // Vertical collision
+  const auto TOLERANCE_Y = 0.05;
+  if (x_max >= TOLERANCE_Y && x_min >= TOLERANCE_Y) {
+    if (y_max >= 0.0 && y_min > y_max) {
+      // Counteract A to move up (Y-)
+      return glm::vec3(0.0, -y_max, 0.0);
+    } else if (y_min >= 0.0 && y_max > y_min) {
+      // Counteract A to move down (Y+)
+      return glm::vec3(0.0, y_min, 0.0);
+    }
+  }
+
+  // Nothing collided
+  return std::nullopt;
 }
 
 void physics::updatePhysics(game& game) {
@@ -55,7 +93,7 @@ void physics::updatePhysics(game& game) {
     
     auto surface_size = glm::abs(boundary_val.rect.max - boundary_val.rect.min);
     // Gravity
-    physics_val.force += glm::vec3(0., 0.3 * physics_val.mass * step_size, 0.);
+    physics_val.force += glm::vec3(0., 18.0 * physics_val.mass * step_size, 0.);
     // Air resistance
     physics_val.force -=
       glm::sign(physics_val.velocity) *
@@ -67,14 +105,14 @@ void physics::updatePhysics(game& game) {
     auto [physics_val, transform_val, boundary_val] = entity->get<physics, transform, boundary>();
 
     // Collision check
-    auto world_rect = boundary_val.getWorldRect(transform_val);
+    auto a_rect = boundary_val.getWorldRect(transform_val);
     tile_index::tile min {
-      static_cast<int32_t>(std::floor(world_rect.min.x)),
-      static_cast<int32_t>(std::floor(world_rect.min.y)),
+      static_cast<int32_t>(std::floor(a_rect.min.x)),
+      static_cast<int32_t>(std::floor(a_rect.min.y)),
     };
     tile_index::tile max {
-      static_cast<int32_t>(std::ceil(world_rect.max.x)),
-      static_cast<int32_t>(std::ceil(world_rect.max.y)),
+      static_cast<int32_t>(std::ceil(a_rect.max.x)),
+      static_cast<int32_t>(std::ceil(a_rect.max.y)),
     };
     for (int y = min[1]; y < max[1]; y += 1) {
       for (int x = min[0]; x < max[0]; x += 1) {
@@ -85,134 +123,68 @@ void physics::updatePhysics(game& game) {
           if (target_id == entity->getId()) continue;
           auto target = game.mWorld.get(target_id);
           auto [target_transform, target_boundary] = target->get<transform, boundary>();
-          auto target_physics = target->try_get<physics>();
-          auto target_rect = target_boundary.getWorldRect(target_transform);
-          auto pos_diff = target_transform.position - transform_val.position;
-          glm::vec3 velocity_diff;
-          if (target_physics != nullptr) {
-            velocity_diff = physics_val.velocity - target_physics->velocity;
-          } else {
-            velocity_diff = physics_val.velocity;
-          }
+          // auto target_physics = target->try_get<physics>();
+          auto b_rect = target_boundary.getWorldRect(target_transform);
+
+          // Run collision test
+          auto a_normal = intersectRectRect(a_rect, b_rect);
+          if (!a_normal.has_value()) continue;
+
+          // Velocity is meaningless here
           /*
-          // Run collision check...
-          auto intersection = world_rect.intersectRect(target_rect);
-          if (!intersection.has_value()) continue;
-          auto intersection_rect = intersection.value();
-          // Determine the collided edge
-          
-          // This is extremely tricky because without enough information, it is
-          // easy to wrongly determine the collided side.
-          // For example, if the object collided at the corner from the top,
-          // it could be detected as it collided with the right/left. Instead
-          // of pushing the object to top, it will push the object to the side,
-          // making the object move abruptly to other direction.
-
-          // To prevent this behavior, we need to put the object velocity
-          // (or the difference between the current position and the previous
-          // position... which is velocity.) in account.
-
-          // Instead of using collision box size to determine the collided
-          // position, we can solely depend on the velocity to determine the
-          // collided edge.
-
-          //  |     |
-          //  |  1  |   --->
-          //  |     |   |     |
-          //            |  2  |
-          //            |     |
-
-          // If 1 and 2 collides, the normal will be LEFT from 1's view,
-          // and RIGHT from 2's view. (Because each object should move along 
-          // that direction)
-
-          // However this is also flawed as well, as it will report wrong
-          // direction when the object is sliding along the edge on other
-          // object. ... We need BOTH logic to determine the position!
-
-          // Using the velocity to determine the previous position, it basically
-          // boils to this problem: While continously moving the object from
-          // the previous position to current position, which edge gets collided
-          // first?
-
-          // The answer can be simply derived - If we were to cancel the
-          // each object's movement to the exact point where they collide -
-          // which edge would result in smaller movement?
-
-          // ... It doesn't work. We need robust tests to handle all AABB
-          // collision case to determine correct collision vectors.
-          
-          auto intersection_size = intersection_rect.max - intersection_rect.min;
-          auto move_diff_ratio = intersection_size / physics_val.velocity;
-
-          glm::vec3 normal;
-          glm::vec3 move_diff;
-          auto move_diff_abs = glm::abs(move_diff_ratio);
-          // Compare midpoint
-          auto target_mid = (target_rect.min + target_rect.max) / 2.0f;
-          auto world_mid = (world_rect.min + world_rect.max) / 2.0f;
-          if (move_diff_abs.x < move_diff_abs.y) {
-            move_diff = physics_val.velocity * move_diff_ratio.x;
-            if (target_mid.x < world_mid.x) {
-              // (target is on the) left
-              normal = glm::vec3(1.0, 0.0, 0.0);
-            } else {
-              // right
-              normal = glm::vec3(-1.0, 0.0, 0.0);
-            }
+          glm::vec3 ab_velocity;
+          if (target_physics != nullptr) {
+            ab_velocity = physics_val.velocity - target_physics->velocity;
           } else {
-            move_diff = physics_val.velocity * move_diff_ratio.y;
-            if (target_mid.y < world_mid.y) {
-              // (target is on the) bottom (note that we didn't flip axis yet)
-              normal = glm::vec3(0.0, 1.0, 0.0);
-            } else {
-              // (target is on the) top
-              normal = glm::vec3(0.0, -1.0, 0.0);
-              physics_val.onGround = -10;
-            }
-          }
-          // Check if the collision should continue (is the entities colliding?)
-          if (glm::dot(glm::normalize(velocity_diff), normal) >= 0.0) {
-            continue;
-          }
-          // Move to the opposite direction to avoid collision
-          if (glm::length(move_diff) > 0.5f) {
-            std::cout << "Object moved too much; " << move_diff.x << ", " << move_diff.y << std::endl;
-            std::cout << "velocity: " << physics_val.velocity.x << ", " << physics_val.velocity.y << std::endl;
-            std::cout << "intersection: " << intersection_size.x << ", " << intersection_size.y << std::endl;
-          }
-          transform_val.position -= move_diff;
-          world_rect = boundary_val.getWorldRect(transform_val);
-          // Calculate impact energy
-          auto vrn = glm::dot(velocity_diff, normal);
-          float impact_energy = -vrn * (1.5) * physics_val.mass;
-          auto fi = normal * impact_energy;
-          physics_val.force += fi;
-          // TODO: Handle physics-physics object collision
-          auto intersection_mid = (intersection_rect.min + intersection_rect.max) / 2.0f;
-          if (physics_val.hasCollisionHandler) {
-            physics_val.collisions.push_back({ target_id, normal, intersection_mid });
-          }
-          physics_val.hasCollision = true;
-          if (target->has<physics>()) {
-            auto target_physics = target->get<physics>();
-            if (target_physics.hasCollisionHandler) {
-              target_physics.collisions.push_back({ entity->getId(), -normal, intersection_mid });
-            }
-            target_physics.hasCollision = true;
+            ab_velocity = physics_val.velocity;
           }
           */
+
+          collisions.push_back({
+            target1: entity->getId(),
+            target2: target_id,
+            normal: a_normal.value(),
+          });
         }
       }
     }
+  }
+  // Impulse generation phase
+  for (auto collision : collisions) {
+    auto a_entity = game.mWorld.get(collision.target1);
+    auto b_entity = game.mWorld.get(collision.target2);
 
-    // Collision update phase
-    for (auto collision : collisions) {
-      // Calculate impulse, update velocity/position, etc
+    if (a_entity == nullptr || b_entity == nullptr) {
+      // This can't happen
+      continue;
     }
 
+    auto [a_physics, a_transform, a_boundary] = a_entity->get<physics, transform, boundary>();
+    auto [b_transform, b_boundary] = b_entity->get<transform, boundary>();
+    auto b_physics = b_entity->try_get<physics>();
+
+    glm::vec3 ab_velocity;
+    if (b_physics != nullptr) {
+      ab_velocity = a_physics.velocity - b_physics->velocity;
+    } else {
+      ab_velocity = a_physics.velocity;
+    }
+
+    // Cancel movement
+    // TODO: Get ratio between A and B, and move them accordingly
+    a_transform.position += collision.normal;
+
+    auto normal_dir = glm::normalize(collision.normal);
+    
+    // Generate impulse energy
+    auto vrn = glm::dot(ab_velocity, normal_dir);
+    float impact_energy = -vrn * (0.8) * a_physics.mass;
+    auto fi = normal_dir * impact_energy;
+    a_physics.force += fi;
+    a_physics.onGround = -10;
+
     // Update collision grid right away
-    game.mWorld.markDirty(*entity);
+    game.mWorld.markDirty(*a_entity);
     game.mWorld.updateIndex();
   }
 }

@@ -21,8 +21,8 @@ FetchContent_Declare(
 
 # FetchContent_MakeAvailable(Catch2)
 
-add_compile_options(-fsanitize=address)
-add_link_options(-fsanitize=address)
+# add_compile_options(-fsanitize=address)
+# add_link_options(-fsanitize=address)
 
 include_directories(${VULKAN_INCLUDE_DIRS})
 include_directories(${SDL2_INCLUDE_DIRS})

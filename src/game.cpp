@@ -19,7 +19,7 @@ void game::init() {
     entity->set<boundary>();
     entity->set<player::player>();
   }
-  /* {
+  {
     // box
     auto entity = mWorld.create();
     auto& transform_val = entity->set<transform>();
@@ -28,7 +28,18 @@ void game::init() {
     auto& physics_val = entity->set<physics::physics>();
     physics_val.hasCollisionHandler = true;
     entity->set<boundary>();
-  } */
+  }
+  {
+    // big box
+    auto entity = mWorld.create();
+    auto& transform_val = entity->set<transform>();
+    transform_val.position.x = 16.5;
+    transform_val.position.y = 0;
+    auto& physics_val = entity->set<physics::physics>();
+    physics_val.hasCollisionHandler = true;
+    auto& boundary_val = entity->set<boundary>();
+    boundary_val.rect.max = glm::vec3(2.0, 2.0, 2.0);
+  }
 }
 
 void game::update() {
@@ -61,11 +72,18 @@ void game::render() {
       continue;
     }
     if (entity->has<tile::tile>()) continue;
+    auto boundary_val = entity->try_get<boundary>();
     SDL_Rect rect;
     rect.x = (transform_val->position.x - offsetX) * 36;
     rect.y = (transform_val->position.y - offsetY) * 36;
     rect.w = 36;
     rect.h = 36;
+    if (boundary_val != nullptr) {
+      rect.x -= boundary_val->rect.min.x * 36;
+      rect.y -= boundary_val->rect.min.y * 36;
+      rect.w = boundary_val->rect.max.x * 36;
+      rect.h = boundary_val->rect.max.y * 36;
+    }
     SDL_SetRenderDrawColor(mRenderer, 255, 0, 0, 255);
     SDL_RenderFillRect(mRenderer, &rect);
   }
@@ -82,8 +100,8 @@ void game::render() {
       mRenderer,
       (transform_val->position.x - offsetX) * 36.0,
       (transform_val->position.y - offsetY) * 36.0,
-      (transform_val->position.x - offsetX + physics_val->velocity.x * 5.0) * 36.0,
-      (transform_val->position.y - offsetY + physics_val->velocity.y * 5.0) * 36.0
+      (transform_val->position.x - offsetX + physics_val->velocity.x / 6.0) * 36.0,
+      (transform_val->position.y - offsetY + physics_val->velocity.y / 6.0) * 36.0
     );
     for (auto collision : physics_val->collisions) {
       SDL_SetRenderDrawColor(mRenderer, 0, 0, 255, 255);

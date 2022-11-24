@@ -11,8 +11,7 @@ namespace physics {
   struct collision2 {
     entity_id target1;
     entity_id target2;
-    glm::vec3 direction;
-    glm::vec3 position;
+    glm::vec3 normal;
   };
 
   struct collision {
