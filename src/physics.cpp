@@ -123,22 +123,23 @@ void physics::updatePhysics(game& game) {
           if (target_id == entity->getId()) continue;
           auto target = game.mWorld.get(target_id);
           auto [target_transform, target_boundary] = target->get<transform, boundary>();
-          // auto target_physics = target->try_get<physics>();
+          auto target_physics = target->try_get<physics>();
           auto b_rect = target_boundary.getWorldRect(target_transform);
 
           // Run collision test
           auto a_normal = intersectRectRect(a_rect, b_rect);
           if (!a_normal.has_value()) continue;
 
-          // Velocity is meaningless here
-          /*
           glm::vec3 ab_velocity;
           if (target_physics != nullptr) {
             ab_velocity = physics_val.velocity - target_physics->velocity;
           } else {
             ab_velocity = physics_val.velocity;
           }
-          */
+
+          auto vrn = glm::dot(ab_velocity, a_normal.value());
+
+          if (vrn > 0.0) continue;
 
           collisions.push_back({
             target1: entity->getId(),
