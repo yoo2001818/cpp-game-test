@@ -126,6 +126,10 @@ void physics::updatePhysics(game& game) {
           auto target_physics = target->try_get<physics>();
           auto b_rect = target_boundary.getWorldRect(target_transform);
 
+          // If the other entity has physics too, compare entity ID to avoid 
+          // running same collision twice
+          if (target_physics != nullptr && target_id < entity->getId()) continue;
+
           // Run collision test
           auto a_normal = intersectRectRect(a_rect, b_rect);
           if (!a_normal.has_value()) continue;
@@ -171,12 +175,20 @@ void physics::updatePhysics(game& game) {
       ab_velocity = a_physics.velocity;
     }
 
-    // Cancel movement
-    // TODO: Get ratio between A and B, and move them accordingly
-    a_transform.position += collision.normal;
-
     auto normal_dir = glm::normalize(collision.normal);
-    
+
+    // Cancel movement
+    if (b_physics != nullptr) {
+      // Get ratio between A and B, and move them accordingly
+      auto a_vrn = glm::dot(a_physics.velocity, normal_dir);
+      auto b_vrn = glm::dot(b_physics->velocity, normal_dir);
+      auto sum_vrn = a_vrn - b_vrn;
+      a_transform.position += collision.normal * (a_vrn / sum_vrn);
+      b_transform.position += collision.normal * (b_vrn / sum_vrn);
+    } else {
+      a_transform.position += collision.normal;
+    }
+
     // Generate impulse energy
     auto vrn = glm::dot(ab_velocity, normal_dir);
     float impact_energy = -vrn * (0.8) * a_physics.mass;
