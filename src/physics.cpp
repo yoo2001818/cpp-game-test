@@ -190,10 +190,20 @@ void physics::updatePhysics(game& game) {
     }
 
     // Generate impulse energy
-    auto vrn = glm::dot(ab_velocity, normal_dir);
-    float impact_energy = -vrn * (0.8) * a_physics.mass;
-    auto fi = normal_dir * impact_energy;
-    a_physics.force += fi;
+    if (b_physics != nullptr) {
+      const float RESTITUTION_COEFF = -0.2;
+      auto vrn = glm::dot(ab_velocity, normal_dir);
+      float j = (-(1.0 + RESTITUTION_COEFF) * vrn) / 
+        (1.0 / a_physics.mass + 1.0 / b_physics->mass);
+      a_physics.force += normal_dir * j;
+      b_physics->force -= normal_dir * j;
+    } else {
+      auto vrn = glm::dot(ab_velocity, normal_dir);
+      float impact_energy = -vrn * (0.8) * a_physics.mass;
+      auto fi = normal_dir * impact_energy;
+      a_physics.force += fi;
+    }
+
     a_physics.onGround = -10;
 
     // Update collision grid right away
