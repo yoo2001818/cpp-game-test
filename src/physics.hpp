@@ -28,6 +28,7 @@ namespace physics {
     bool hasCollision = false;
     bool hasCollisionHandler = false;
     std::vector<collision> collisions;
+    int numCollisions = 0;
   };
 
   void updatePhysics(game& game);

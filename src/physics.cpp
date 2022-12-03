@@ -98,6 +98,8 @@ void physics::updatePhysics(game& game) {
     physics_val.force -=
       glm::sign(physics_val.velocity) *
       physics_val.velocity * physics_val.velocity * surface_size * glm::vec3(0.5 * 0.8, 0.5 * 0.3, 1.0) * step_size;
+
+    physics_val.numCollisions = 0;
   }
 
   // Collision check phase
@@ -150,6 +152,9 @@ void physics::updatePhysics(game& game) {
             target2: target_id,
             normal: a_normal.value(),
           });
+
+          physics_val.numCollisions += 1;
+          if (target_physics != nullptr) target_physics->numCollisions += 1;
         }
       }
     }
@@ -195,13 +200,13 @@ void physics::updatePhysics(game& game) {
       auto vrn = glm::dot(ab_velocity, normal_dir);
       float j = (-(1.0 + RESTITUTION_COEFF) * vrn) / 
         (1.0 / a_physics.mass + 1.0 / b_physics->mass);
-      a_physics.force += normal_dir * j;
-      b_physics->force -= normal_dir * j;
+      a_physics.force += normal_dir * j / static_cast<float>(a_physics.numCollisions);
+      b_physics->force -= normal_dir * j / static_cast<float>(b_physics->numCollisions);
     } else {
       auto vrn = glm::dot(ab_velocity, normal_dir);
       float impact_energy = -vrn * (0.8) * a_physics.mass;
       auto fi = normal_dir * impact_energy;
-      a_physics.force += fi;
+      a_physics.force += fi / static_cast<float>(a_physics.numCollisions);
     }
 
     a_physics.onGround = -10;
