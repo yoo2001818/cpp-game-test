@@ -188,10 +188,10 @@ void physics::updatePhysics(game& game) {
       auto a_vrn = glm::dot(a_physics.velocity, normal_dir);
       auto b_vrn = glm::dot(b_physics->velocity, normal_dir);
       auto sum_vrn = a_vrn - b_vrn;
-      a_transform.position += collision.normal * (a_vrn / sum_vrn);
-      b_transform.position += collision.normal * (b_vrn / sum_vrn);
+      a_transform.position += collision.normal * (a_vrn / sum_vrn) / static_cast<float>(a_physics.numCollisions);
+      b_transform.position += collision.normal * (b_vrn / sum_vrn) / static_cast<float>(b_physics->numCollisions);
     } else {
-      a_transform.position += collision.normal;
+      a_transform.position += collision.normal / static_cast<float>(a_physics.numCollisions);
     }
 
     // Generate impulse energy
