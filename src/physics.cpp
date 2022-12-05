@@ -1,13 +1,14 @@
 #include <iostream>
+#include <algorithm>
 
 #include "physics.hpp"
 #include "transform.hpp"
 #include "boundary.hpp"
 
 std::optional<glm::vec3> intersectRectRect(
-  rect a_bounds,
-  rect b_bounds
-) {
+    rect a_bounds,
+    rect b_bounds)
+{
   // - Vertical collision takes precedence
   // - We assume that only A moves (B is treated as a rectangle, A is treated as a line)
 
@@ -25,34 +26,42 @@ std::optional<glm::vec3> intersectRectRect(
 
   // |  A  |
   //       |  B  |
-  // 
+  //
   //       + <-> -
   auto x_max = a_bounds.max.x - b_bounds.min.x;
 
   //       |  A  |
   // |  B  |
-  // 
+  //
   // - <-> +
   auto x_min = b_bounds.max.x - a_bounds.min.x;
 
   // Horizontal collision
   // (We require some tolerance to avoid horizontal collision to wrongly occur)
   const auto TOLERANCE_X = 0.3;
-  if (y_max >= TOLERANCE_X && y_min >= TOLERANCE_X) {
-    if (x_max >= 0.0 && x_min > x_max) {
+  if (y_max >= TOLERANCE_X && y_min >= TOLERANCE_X)
+  {
+    if (x_max >= 0.0 && x_min > x_max)
+    {
       return glm::vec3(-x_max, 0.0, 0.0);
-    } else if (x_min >= 0.0 && x_max > x_min) {
+    }
+    else if (x_min >= 0.0 && x_max > x_min)
+    {
       return glm::vec3(x_min, 0.0, 0.0);
     }
   }
 
   // Vertical collision
   const auto TOLERANCE_Y = 0.05;
-  if (x_max >= TOLERANCE_Y && x_min >= TOLERANCE_Y) {
-    if (y_max >= 0.0 && y_min > y_max) {
+  if (x_max >= TOLERANCE_Y && x_min >= TOLERANCE_Y)
+  {
+    if (y_max >= 0.0 && y_min > y_max)
+    {
       // Counteract A to move up (Y-)
       return glm::vec3(0.0, -y_max, 0.0);
-    } else if (y_min >= 0.0 && y_max > y_min) {
+    }
+    else if (y_min >= 0.0 && y_max > y_min)
+    {
       // Counteract A to move down (Y+)
       return glm::vec3(0.0, y_min, 0.0);
     }
@@ -62,7 +71,26 @@ std::optional<glm::vec3> intersectRectRect(
   return std::nullopt;
 }
 
-void physics::updatePhysics(game& game) {
+void addCollisionsCount(std::array<float, 4> &numCollisions, glm::vec3 normal)
+{
+  numCollisions[0] += std::max(glm::dot(glm::vec3(1.0, 0.0, 0.0), normal), 0.0f);
+  numCollisions[1] += std::max(glm::dot(glm::vec3(-1.0, 0.0, 0.0), normal), 0.0f);
+  numCollisions[2] += std::max(glm::dot(glm::vec3(0.0, 1.0, 0.0), normal), 0.0f);
+  numCollisions[3] += std::max(glm::dot(glm::vec3(0.0, -1.0, 0.0), normal), 0.0f);
+}
+
+float getCollisionCount(std::array<float, 4> &numCollisions, glm::vec3 normal)
+{
+  float count = 0;
+  count += std::max(glm::dot(glm::vec3(1.0, 0.0, 0.0), normal), 0.0f) * numCollisions[0];
+  count += std::max(glm::dot(glm::vec3(-1.0, 0.0, 0.0), normal), 0.0f) * numCollisions[1];
+  count += std::max(glm::dot(glm::vec3(0.0, 1.0, 0.0), normal), 0.0f) * numCollisions[2];
+  count += std::max(glm::dot(glm::vec3(0.0, -1.0, 0.0), normal), 0.0f) * numCollisions[3];
+  return count;
+}
+
+void physics::updatePhysics(game &game)
+{
   auto query = game.mWorld.getQuery<physics, transform, boundary>();
   std::vector<collision2> collisions;
 
@@ -81,7 +109,8 @@ void physics::updatePhysics(game& game) {
   float step_size = 1.0 / 60.0;
 
   // Movement phase
-  for (auto entity : query) {
+  for (auto entity : query)
+  {
     auto [physics_val, transform_val, boundary_val] = entity->get<physics, transform, boundary>();
 
     physics_val.velocity += physics_val.force / physics_val.mass;
@@ -90,81 +119,101 @@ void physics::updatePhysics(game& game) {
 
     // Reset previous force
     physics_val.force = glm::vec3(0.0);
-    
+
     auto surface_size = glm::abs(boundary_val.rect.max - boundary_val.rect.min);
     // Gravity
     physics_val.force += glm::vec3(0., 18.0 * physics_val.mass * step_size, 0.);
     // Air resistance
     physics_val.force -=
-      glm::sign(physics_val.velocity) *
-      physics_val.velocity * physics_val.velocity * surface_size * glm::vec3(0.5 * 0.8, 0.5 * 0.3, 1.0) * step_size;
+        glm::sign(physics_val.velocity) *
+        physics_val.velocity * physics_val.velocity * surface_size * glm::vec3(0.5 * 0.8, 0.5 * 0.3, 1.0) * step_size;
 
-    physics_val.numCollisions = 0;
+    physics_val.numCollisions = {
+        0,
+    };
   }
 
   // Collision check phase
-  for (auto entity : query) {
+  for (auto entity : query)
+  {
     auto [physics_val, transform_val, boundary_val] = entity->get<physics, transform, boundary>();
 
     // Collision check
     auto a_rect = boundary_val.getWorldRect(transform_val);
-    tile_index::tile min {
-      static_cast<int32_t>(std::floor(a_rect.min.x)),
-      static_cast<int32_t>(std::floor(a_rect.min.y)),
+    tile_index::tile min{
+        static_cast<int32_t>(std::floor(a_rect.min.x)),
+        static_cast<int32_t>(std::floor(a_rect.min.y)),
     };
-    tile_index::tile max {
-      static_cast<int32_t>(std::ceil(a_rect.max.x)),
-      static_cast<int32_t>(std::ceil(a_rect.max.y)),
+    tile_index::tile max{
+        static_cast<int32_t>(std::ceil(a_rect.max.x)),
+        static_cast<int32_t>(std::ceil(a_rect.max.y)),
     };
-    for (int y = min[1]; y < max[1]; y += 1) {
-      for (int x = min[0]; x < max[0]; x += 1) {
-        tile_index::tile current {x, y};
+    for (int y = min[1]; y < max[1]; y += 1)
+    {
+      for (int x = min[0]; x < max[0]; x += 1)
+      {
+        tile_index::tile current{x, y};
         auto targets = game.mWorld.getTileIndex().get(current);
-        for (auto target_id : targets) {
+        for (auto target_id : targets)
+        {
           // Skip itself for obvious reasons
-          if (target_id == entity->getId()) continue;
+          if (target_id == entity->getId())
+            continue;
           auto target = game.mWorld.get(target_id);
           auto [target_transform, target_boundary] = target->get<transform, boundary>();
           auto target_physics = target->try_get<physics>();
           auto b_rect = target_boundary.getWorldRect(target_transform);
 
-          // If the other entity has physics too, compare entity ID to avoid 
+          // If the other entity has physics too, compare entity ID to avoid
           // running same collision twice
-          if (target_physics != nullptr && target_id < entity->getId()) continue;
+          if (target_physics != nullptr && target_id < entity->getId())
+            continue;
 
           // Run collision test
           auto a_normal = intersectRectRect(a_rect, b_rect);
-          if (!a_normal.has_value()) continue;
+          if (!a_normal.has_value())
+            continue;
 
           glm::vec3 ab_velocity;
-          if (target_physics != nullptr) {
+          if (target_physics != nullptr)
+          {
             ab_velocity = physics_val.velocity - target_physics->velocity;
-          } else {
+          }
+          else
+          {
             ab_velocity = physics_val.velocity;
           }
 
           auto vrn = glm::dot(ab_velocity, a_normal.value());
 
-          if (vrn > 0.0) continue;
+          if (vrn > 0.0)
+            continue;
 
           collisions.push_back({
-            target1: entity->getId(),
-            target2: target_id,
-            normal: a_normal.value(),
+            target1 : entity->getId(),
+            target2 : target_id,
+            normal : a_normal.value(),
           });
 
-          physics_val.numCollisions += 1;
-          if (target_physics != nullptr) target_physics->numCollisions += 1;
+          auto a_normal_dir = glm::normalize(a_normal.value());
+
+          addCollisionsCount(physics_val.numCollisions, a_normal_dir);
+          if (target_physics != nullptr)
+          {
+            addCollisionsCount(target_physics->numCollisions, -a_normal_dir);
+          }
         }
       }
     }
   }
   // Impulse generation phase
-  for (auto collision : collisions) {
+  for (auto collision : collisions)
+  {
     auto a_entity = game.mWorld.get(collision.target1);
     auto b_entity = game.mWorld.get(collision.target2);
 
-    if (a_entity == nullptr || b_entity == nullptr) {
+    if (a_entity == nullptr || b_entity == nullptr)
+    {
       // This can't happen
       continue;
     }
@@ -174,39 +223,51 @@ void physics::updatePhysics(game& game) {
     auto b_physics = b_entity->try_get<physics>();
 
     glm::vec3 ab_velocity;
-    if (b_physics != nullptr) {
+    if (b_physics != nullptr)
+    {
       ab_velocity = a_physics.velocity - b_physics->velocity;
-    } else {
+    }
+    else
+    {
       ab_velocity = a_physics.velocity;
     }
 
     auto normal_dir = glm::normalize(collision.normal);
 
     // Cancel movement
-    if (b_physics != nullptr) {
+    if (b_physics != nullptr)
+    {
       // Get ratio between A and B, and move them accordingly
       auto a_vrn = glm::dot(a_physics.velocity, normal_dir);
       auto b_vrn = glm::dot(b_physics->velocity, normal_dir);
       auto sum_vrn = a_vrn - b_vrn;
-      a_transform.position += collision.normal * (a_vrn / sum_vrn) / static_cast<float>(a_physics.numCollisions);
-      b_transform.position += collision.normal * (b_vrn / sum_vrn) / static_cast<float>(b_physics->numCollisions);
-    } else {
-      a_transform.position += collision.normal / static_cast<float>(a_physics.numCollisions);
+      a_transform.position += collision.normal * (a_vrn / sum_vrn);
+      b_transform.position += collision.normal * (b_vrn / sum_vrn);
+    }
+    else
+    {
+      a_transform.position += collision.normal;
     }
 
+    float collision_count = getCollisionCount(a_physics.numCollisions, normal_dir);
     // Generate impulse energy
-    if (b_physics != nullptr) {
+    if (b_physics != nullptr)
+    {
       const float RESTITUTION_COEFF = -0.2;
       auto vrn = glm::dot(ab_velocity, normal_dir);
-      float j = (-(1.0 + RESTITUTION_COEFF) * vrn) / 
-        (1.0 / a_physics.mass + 1.0 / b_physics->mass);
-      a_physics.force += normal_dir * j / static_cast<float>(a_physics.numCollisions);
-      b_physics->force -= normal_dir * j / static_cast<float>(b_physics->numCollisions);
-    } else {
+      float j = (-(1.0 + RESTITUTION_COEFF) * vrn) /
+                (1.0 / a_physics.mass + 1.0 / b_physics->mass);
+      a_physics.force += normal_dir * j / collision_count;
+
+      float b_collision_count = getCollisionCount(b_physics->numCollisions, -normal_dir);
+      b_physics->force -= normal_dir * j / b_collision_count;
+    }
+    else
+    {
       auto vrn = glm::dot(ab_velocity, normal_dir);
       float impact_energy = -vrn * (0.8) * a_physics.mass;
       auto fi = normal_dir * impact_energy;
-      a_physics.force += fi / static_cast<float>(a_physics.numCollisions);
+      a_physics.force += fi / collision_count;
     }
 
     a_physics.onGround = -10;

@@ -3,6 +3,7 @@
 
 #include <glm/glm.hpp>
 #include <vector>
+#include <array>
 
 #include "game.hpp"
 #include "entity.hpp"
@@ -28,7 +29,7 @@ namespace physics {
     bool hasCollision = false;
     bool hasCollisionHandler = false;
     std::vector<collision> collisions;
-    int numCollisions = 0;
+    std::array<float, 4> numCollisions;
   };
 
   void updatePhysics(game& game);
