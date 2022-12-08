@@ -1,5 +1,6 @@
 #include <iostream>
 #include <algorithm>
+#include <cmath>
 
 #include "physics.hpp"
 #include "transform.hpp"
@@ -173,6 +174,9 @@ void physics::updatePhysics(game &game)
           auto a_normal = intersectRectRect(a_rect, b_rect);
           if (!a_normal.has_value())
             continue;
+          if (glm::length(a_normal.value()) < 0.001f) {
+            continue;
+          }
 
           glm::vec3 ab_velocity;
           if (target_physics != nullptr)
