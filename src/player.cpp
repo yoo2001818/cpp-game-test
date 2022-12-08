@@ -1,3 +1,5 @@
+#include <iostream>
+
 #include "player.hpp"
 #include "physics.hpp"
 
@@ -28,5 +30,6 @@ void player::updatePlayer(game& game) {
     auto [physics_val, transform_val] = entity->get<physics::physics, transform>();
     game.mViewport.mTransform.position.x = transform_val.position.x - windowWidth / 2 / 36.0;
     game.mViewport.mTransform.position.y = transform_val.position.y - windowHeight / 2 / 36.0;
+    // std::cout << transform_val.position.y << ", " << physics_val.velocity.y << ", " << physics_val.force.y << std::endl;
   }
 }

@@ -81,8 +81,8 @@ void tile::renderTile(game& game) {
         if (transform_val == nullptr) continue;
         if (tile_val == nullptr) continue;
         SDL_Rect rect;
-        rect.x = (transform_val->position.x - tileOffsetX) * TILE_SIZE - tileDeltaX;
-        rect.y = (transform_val->position.y - tileOffsetY) * TILE_SIZE - tileDeltaY;
+        rect.x = static_cast<int>(std::roundf((transform_val->position.x - tileOffsetX) * TILE_SIZE - tileDeltaX));
+        rect.y = static_cast<int>(std::roundf((transform_val->position.y - tileOffsetY) * TILE_SIZE - tileDeltaY));
         rect.w = TILE_SIZE;
         rect.h = TILE_SIZE;
         SDL_Rect srcRect;

@@ -13,6 +13,7 @@ namespace physics {
     entity_id target1;
     entity_id target2;
     glm::vec3 normal;
+    float length;
   };
 
   struct collision {

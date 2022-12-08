@@ -45,8 +45,8 @@ void game::init() {
 void game::update() {
   if (!this->mPaused || this->mShouldStep) {
     tile::updateTile(*this);
-    physics::updatePhysics(*this);
     player::updatePlayer(*this);
+    physics::updatePhysics(*this);
     this->mShouldStep = false;
   }
 
@@ -74,8 +74,8 @@ void game::render() {
     if (entity->has<tile::tile>()) continue;
     auto boundary_val = entity->try_get<boundary>();
     SDL_Rect rect;
-    rect.x = (transform_val->position.x - offsetX) * 36;
-    rect.y = (transform_val->position.y - offsetY) * 36;
+    rect.x = static_cast<int>(std::roundf((transform_val->position.x - offsetX) * 36.0));
+    rect.y = static_cast<int>(std::roundf((transform_val->position.y - offsetY) * 36.0));
     rect.w = 36;
     rect.h = 36;
     if (boundary_val != nullptr) {
@@ -92,16 +92,23 @@ void game::render() {
   for (auto entity : mWorld) {
     auto transform_val = entity->try_get<transform>();
     auto physics_val = entity->try_get<physics::physics>();
+    auto boundary_val = entity->try_get<boundary>();
     if (transform_val == nullptr || physics_val == nullptr) {
       continue;
     }
     SDL_SetRenderDrawColor(mRenderer, 0, 128, 128, 255);
+    float x = transform_val->position.x - offsetX;
+    float y = transform_val->position.y - offsetY;
+    if (boundary_val != nullptr) {
+      x += (boundary_val->rect.min.x + boundary_val->rect.max.x) / 2.0;
+      y += (boundary_val->rect.min.y + boundary_val->rect.max.y) / 2.0;
+    }
     SDL_RenderDrawLineF(
       mRenderer,
-      (transform_val->position.x - offsetX) * 36.0,
-      (transform_val->position.y - offsetY) * 36.0,
-      (transform_val->position.x - offsetX + physics_val->velocity.x / 6.0) * 36.0,
-      (transform_val->position.y - offsetY + physics_val->velocity.y / 6.0) * 36.0
+      x * 36.0,
+      y * 36.0,
+      (x + physics_val->velocity.x / 6.0) * 36.0,
+      (y + physics_val->velocity.y / 6.0) * 36.0
     );
     for (auto collision : physics_val->collisions) {
       SDL_SetRenderDrawColor(mRenderer, 0, 0, 255, 255);
