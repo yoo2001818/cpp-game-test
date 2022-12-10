@@ -248,6 +248,8 @@ void physics::updatePhysics(game &game)
     auto vrn = glm::dot(ab_velocity, collision.normal);
     if (vrn > 0.0) continue;
 
+    float collision_count = getCollisionCount(a_physics.numCollisions, collision.normal);
+
     // Cancel movement
     if (b_physics != nullptr)
     {
@@ -255,16 +257,17 @@ void physics::updatePhysics(game &game)
       auto a_vrn = glm::abs(glm::dot(a_physics.velocity, collision.normal));
       auto b_vrn = glm::abs(glm::dot(b_physics->velocity, collision.normal));
       auto sum_vrn = a_vrn + b_vrn;
-      a_transform.position += collision.normal * collision.length * (a_vrn / sum_vrn);
-      b_transform.position -= collision.normal * collision.length * (b_vrn / sum_vrn);
+      a_transform.position += collision.normal * collision.length * (a_vrn / sum_vrn) / collision_count;
+
+      float b_collision_count = getCollisionCount(b_physics->numCollisions, -collision.normal);
+      b_transform.position -= collision.normal * collision.length * (b_vrn / sum_vrn) / b_collision_count;
       game.mWorld.markDirty(*b_entity);
     }
     else
     {
-      a_transform.position += collision.normal * collision.length;
+      a_transform.position += collision.normal * collision.length / collision_count;
     }
 
-    float collision_count = getCollisionCount(a_physics.numCollisions, collision.normal);
     // Generate impulse energy
     if (b_physics != nullptr)
     {
