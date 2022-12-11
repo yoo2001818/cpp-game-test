@@ -6,6 +6,7 @@
 
 #include "world.hpp"
 #include "viewport.hpp"
+#include "resource.hpp"
 
 class game {
   public:
@@ -14,6 +15,7 @@ class game {
   bool mPaused;
   bool mShouldStep;
   SDL_Renderer *mRenderer;
+  resource::resource_manager<SDL_Texture*> mTileResourceManager;
 
   game(SDL_Renderer *renderer): mWorld(), mRenderer(renderer), mPaused(false), mShouldStep(false) {}
 
