@@ -72,14 +72,14 @@ namespace resource {
     resource_manager() {};
 
     void insert(std::string name, const T& value) {
-      auto [it, is_created] = this->entries.emplace(name, { value });
+      auto [it, is_created] = this->entries.emplace(name, resource_entry<T>({ value }));
       if (!is_created) {
         it->second.update(value);
       }
     };
 
     void insert(std::string name, const std::function<std::optional<T>()>& load_entry_function) {
-      auto [it, is_created] = this->entries.emplace(name, { load_entry_function });
+      auto [it, is_created] = this->entries.emplace(name, resource_entry<T>({ load_entry_function }));
       if (!is_created) {
         it->second.update(load_entry_function);
       }

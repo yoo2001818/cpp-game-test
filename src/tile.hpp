@@ -2,12 +2,14 @@
 #define TILE_HPP_
 
 #include <cstdint>
+#include <string>
 
 #include "game.hpp"
 
 namespace tile {
   class tile {
     public:
+    std::string tileset;
     int32_t id;
   };
 

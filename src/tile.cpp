@@ -8,14 +8,13 @@
 #include "transform.hpp"
 #include "boundary.hpp"
 
-SDL_Texture *TILE_TEXTURE;
-
 void tile::loadTile(game& game) {
   // TODO: Move this to asset manager
-  TILE_TEXTURE = IMG_LoadTexture(game.mRenderer, "res/tile2.png");
-  if (TILE_TEXTURE == nullptr) {
+  auto tileTexture = IMG_LoadTexture(game.mRenderer, "res/tile2.png");
+  if (tileTexture == nullptr) {
     throw std::runtime_error("Failed to load tile image");
   }
+  game.mTileResourceManager.insert("tile2", tileTexture);
 
   // Read map file
   std::ifstream mapFile;
@@ -36,7 +35,7 @@ void tile::loadTile(game& game) {
         transform_val.position.x = static_cast<float>(x);
         transform_val.position.y = static_cast<float>(y);
 
-        auto& tile_val = entity->set<tile>({ id });
+        auto& tile_val = entity->set<tile>({ "tile2", id });
         entity->set<boundary>();
 
         game.mWorld.markDirty(*entity);
@@ -80,6 +79,10 @@ void tile::renderTile(game& game) {
         auto [transform_val, tile_val] = entity->try_get<transform, tile>();
         if (transform_val == nullptr) continue;
         if (tile_val == nullptr) continue;
+
+        auto tile_tex = game.mTileResourceManager.get(tile_val->tileset).value();
+        if (!tile_tex.has_value()) continue;
+
         SDL_Rect rect;
         rect.x = static_cast<int>(std::roundf((transform_val->position.x - tileOffsetX) * TILE_SIZE - tileDeltaX));
         rect.y = static_cast<int>(std::roundf((transform_val->position.y - tileOffsetY) * TILE_SIZE - tileDeltaY));
@@ -90,7 +93,7 @@ void tile::renderTile(game& game) {
         srcRect.y = (tile_val->id / 20) * 18;
         srcRect.w = 18;
         srcRect.h = 18;
-        SDL_RenderCopy(game.mRenderer, TILE_TEXTURE, &srcRect, &rect);
+        SDL_RenderCopy(game.mRenderer, tile_tex.value(), &srcRect, &rect);
       }
     }
   }
