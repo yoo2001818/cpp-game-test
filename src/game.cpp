@@ -3,6 +3,7 @@
 #include "transform.hpp"
 #include "velocity.hpp"
 #include "tile.hpp"
+#include "sprite.hpp"
 #include "physics.hpp"
 #include "boundary.hpp"
 #include "player.hpp"
@@ -18,6 +19,7 @@ void game::init() {
     physics_val.hasCollisionHandler = true;
     entity->set<boundary>();
     entity->set<player::player>();
+    entity->set<sprite::sprite>({ "tile2", 26 });
   }
   {
     // box
@@ -28,6 +30,7 @@ void game::init() {
     auto& physics_val = entity->set<physics::physics>();
     physics_val.hasCollisionHandler = true;
     entity->set<boundary>();
+    entity->set<sprite::sprite>({ "tile2", 26 });
   }
   {
     // big box
@@ -39,6 +42,7 @@ void game::init() {
     physics_val.hasCollisionHandler = true;
     auto& boundary_val = entity->set<boundary>();
     boundary_val.rect.max = glm::vec3(2.0, 2.0, 2.0);
+    entity->set<sprite::sprite>({ "tile2", 26 });
   }
 }
 
@@ -62,6 +66,7 @@ void game::render() {
   SDL_GetRendererOutputSize(mRenderer, &windowWidth, &windowHeight);
 
   tile::renderTile(*this);
+  sprite::renderSprite(*this);
 
   // Render non-tile entities
   float offsetX = mViewport.mTransform.position.x;
@@ -72,6 +77,7 @@ void game::render() {
       continue;
     }
     if (entity->has<tile::tile>()) continue;
+    if (entity->has<sprite::sprite>()) continue;
     auto boundary_val = entity->try_get<boundary>();
     SDL_Rect rect;
     rect.x = static_cast<int>(std::roundf((transform_val->position.x - offsetX) * 36.0));
@@ -128,21 +134,6 @@ void game::render() {
         rect.y + collision.direction.y * 36.0
       );
     }
-  }
-
-  // Render "minimap" on the rendered list
-  for (auto entity : mWorld) {
-    auto transform_val = entity->try_get<transform>();
-    if (transform_val == nullptr) {
-      continue;
-    }
-    SDL_Rect rect;
-    rect.x = transform_val->position.x * 3;
-    rect.y = transform_val->position.y * 3;
-    rect.w = 3;
-    rect.h = 3;
-    SDL_SetRenderDrawColor(mRenderer, 255, 0, 0, 255);
-    SDL_RenderFillRect(mRenderer, &rect);
   }
 
   SDL_RenderPresent(mRenderer);
