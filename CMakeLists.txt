@@ -27,6 +27,7 @@ FetchContent_Declare(
 include_directories(${VULKAN_INCLUDE_DIRS})
 include_directories(${SDL2_INCLUDE_DIRS})
 include_directories(${SDL2_IMAGE_INCLUDE_DIRS})
+include_directories(${SDL2_TTF_INCLUDE_DIRS})
 include_directories(${GLM_INCLUDE_DIRS})
 
 include_directories(${PROJECT_SOURCE_DIR}/src)
@@ -34,6 +35,7 @@ file(GLOB SOURCES ${PROJECT_SOURCE_DIR}/src/*.cpp)
 add_executable(CppGameTest ${SOURCES})
 target_link_libraries(CppGameTest ${SDL2_LIBRARIES})
 target_link_libraries(CppGameTest ${SDL2_IMAGE_LIBRARIES})
+target_link_libraries(CppGameTest ${SDL2_TTF_LIBRARIES})
 
 # file(GLOB TEST_SOURCES ${PROJECT_SOURCE_DIR}/test/*.cpp)
 # list(APPEND TEST_SOURCES ${SOURCES})
