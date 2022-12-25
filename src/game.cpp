@@ -1,3 +1,4 @@
+#include <SDL2/SDL_image.h>
 #include "game.hpp"
 #include "entity.hpp"
 #include "transform.hpp"
@@ -10,6 +11,12 @@
 
 void game::init() {
   tile::loadTile(*this);
+  // TODO: Move this to asset manager
+  auto tileTexture = IMG_LoadTexture(mRenderer, "res/player-idle.png");
+  if (tileTexture == nullptr) {
+    throw std::runtime_error("Failed to load tile image");
+  }
+  mTileResourceManager.insert("player-idle", tileTexture);
   {
     auto entity = mWorld.create();
     auto& transform_val = entity->set<transform>();
@@ -19,7 +26,7 @@ void game::init() {
     physics_val.hasCollisionHandler = true;
     entity->set<boundary>();
     entity->set<player::player>();
-    entity->set<sprite::sprite>({ "tile2", 26 });
+    entity->set<sprite::sprite>({ "player-idle", 0 });
   }
   {
     // box
