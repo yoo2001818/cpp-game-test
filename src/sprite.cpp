@@ -14,8 +14,9 @@ void sprite::renderSprite(game& game) {
     if (transform_val == nullptr) continue;
     auto sprite_val = entity->try_get<sprite>();
     if (sprite_val == nullptr) continue;
-    auto sprite_tex = game.mTileResourceManager.get(sprite_val->tileset).value();
-    if (!sprite_tex.has_value()) continue;
+    auto& sprite_tex_opt = game.mTileResourceManager.get(sprite_val->tileset).value();
+    if (!sprite_tex_opt.has_value()) continue;
+    auto& sprite_tex = sprite_tex_opt.value();
     auto boundary_val = entity->try_get<boundary>();
     SDL_Rect rect;
     rect.x = static_cast<int>(std::roundf((transform_val->position.x - offsetX) * 36.0));
@@ -29,11 +30,11 @@ void sprite::renderSprite(game& game) {
       rect.h = boundary_val->rect.max.y * 36;
     }
     SDL_Rect srcRect;
-    srcRect.x = (sprite_val->id % 20) * 18;
-    srcRect.y = (sprite_val->id / 20) * 18;
-    srcRect.w = 18;
-    srcRect.h = 18;
-    SDL_RenderCopy(game.mRenderer, sprite_tex.value(), &srcRect, &rect);
+    srcRect.x = (sprite_val->id % sprite_tex->metadata.width) * sprite_tex->metadata.tileWidth;
+    srcRect.y = (sprite_val->id / sprite_tex->metadata.width) * sprite_tex->metadata.tileHeight;
+    srcRect.w = sprite_tex->metadata.tileWidth;
+    srcRect.h = sprite_tex->metadata.tileHeight;
+    SDL_RenderCopy(game.mRenderer, sprite_tex->texture, &srcRect, &rect);
   }
 }
 

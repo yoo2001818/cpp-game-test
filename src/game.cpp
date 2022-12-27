@@ -10,13 +10,17 @@
 #include "player.hpp"
 
 void game::init() {
+  mTileResourceManager.insert("tile2",
+    std::make_shared<tileset::tileset>(
+      mRenderer,
+      "res/tile2.png",
+      tileset::tileset_metadata({ 18, 18, 20, 9 })));
+  mTileResourceManager.insert("player-idle",
+    std::make_shared<tileset::tileset>(
+      mRenderer,
+      "res/player-idle.png",
+      tileset::tileset_metadata({ 33, 32, 4, 1 })));
   tile::loadTile(*this);
-  // TODO: Move this to asset manager
-  auto tileTexture = IMG_LoadTexture(mRenderer, "res/player-idle.png");
-  if (tileTexture == nullptr) {
-    throw std::runtime_error("Failed to load tile image");
-  }
-  mTileResourceManager.insert("player-idle", tileTexture);
   {
     auto entity = mWorld.create();
     auto& transform_val = entity->set<transform>();
@@ -24,7 +28,8 @@ void game::init() {
     transform_val.position.y = 0;
     auto& physics_val = entity->set<physics::physics>();
     physics_val.hasCollisionHandler = true;
-    entity->set<boundary>();
+    auto& boundary_val = entity->set<boundary>();
+    boundary_val.rect.max = glm::vec3(2.0, 2.0, 2.0);
     entity->set<player::player>();
     entity->set<sprite::sprite>({ "player-idle", 0 });
   }
@@ -58,6 +63,7 @@ void game::update() {
     tile::updateTile(*this);
     player::updatePlayer(*this);
     physics::updatePhysics(*this);
+    this->mTick += 1;
     this->mShouldStep = false;
   }
 

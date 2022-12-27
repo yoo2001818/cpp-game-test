@@ -9,13 +9,6 @@
 #include "boundary.hpp"
 
 void tile::loadTile(game& game) {
-  // TODO: Move this to asset manager
-  auto tileTexture = IMG_LoadTexture(game.mRenderer, "res/tile2.png");
-  if (tileTexture == nullptr) {
-    throw std::runtime_error("Failed to load tile image");
-  }
-  game.mTileResourceManager.insert("tile2", tileTexture);
-
   // Read map file
   std::ifstream mapFile;
   mapFile.open("res/map3.csv");
@@ -80,8 +73,10 @@ void tile::renderTile(game& game) {
         if (transform_val == nullptr) continue;
         if (tile_val == nullptr) continue;
 
-        auto tile_tex = game.mTileResourceManager.get(tile_val->tileset).value();
-        if (!tile_tex.has_value()) continue;
+        auto& tile_tex_opt = game.mTileResourceManager.get(tile_val->tileset).value();
+        if (!tile_tex_opt.has_value()) continue;
+
+        auto& tile_tex = tile_tex_opt.value();
 
         SDL_Rect rect;
         rect.x = static_cast<int>(std::roundf((transform_val->position.x - tileOffsetX) * TILE_SIZE - tileDeltaX));
@@ -89,11 +84,11 @@ void tile::renderTile(game& game) {
         rect.w = TILE_SIZE;
         rect.h = TILE_SIZE;
         SDL_Rect srcRect;
-        srcRect.x = (tile_val->id % 20) * 18;
-        srcRect.y = (tile_val->id / 20) * 18;
-        srcRect.w = 18;
-        srcRect.h = 18;
-        SDL_RenderCopy(game.mRenderer, tile_tex.value(), &srcRect, &rect);
+        srcRect.x = (tile_val->id % tile_tex->metadata.width) * tile_tex->metadata.tileWidth;
+        srcRect.y = (tile_val->id / tile_tex->metadata.width) * tile_tex->metadata.tileHeight;
+        srcRect.w = tile_tex->metadata.tileWidth;
+        srcRect.h = tile_tex->metadata.tileHeight;
+        SDL_RenderCopy(game.mRenderer, tile_tex->texture, &srcRect, &rect);
       }
     }
   }

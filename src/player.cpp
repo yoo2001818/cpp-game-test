@@ -2,6 +2,7 @@
 
 #include "player.hpp"
 #include "physics.hpp"
+#include "sprite.hpp"
 
 void player::updatePlayer(game& game) {
   auto query = game.mWorld.getQuery<player>();
@@ -20,6 +21,10 @@ void player::updatePlayer(game& game) {
         physics_val.velocity.y = -18.0;
         physics_val.onGround = 1;
       }
+    }
+    if (game.mTick % 10 == 0) {
+      auto& sprite_val = entity->get<sprite::sprite>();
+      sprite_val.id = (sprite_val.id + 1) % 4;
     }
   }
 
