@@ -29,9 +29,9 @@ void game::init() {
     auto& physics_val = entity->set<physics::physics>();
     physics_val.hasCollisionHandler = true;
     auto& boundary_val = entity->set<boundary>();
-    boundary_val.rect.max = glm::vec3(2.0, 2.0, 2.0);
+    boundary_val.rect.max = glm::vec3(1.0, 1.0, 1.0);
     entity->set<player::player>();
-    entity->set<sprite::sprite>({ "player-idle", 0 });
+    entity->set<sprite::sprite>({ "player-idle", 0, { glm::vec3(0.0, 0.0, 0.0), glm::vec3(1.0, 1.0, 1.0) } });
   }
   {
     // box
