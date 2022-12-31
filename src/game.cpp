@@ -89,8 +89,8 @@ void game::render() {
     if (transform_val == nullptr) {
       continue;
     }
-    if (entity->has<tile::tile>()) continue;
-    if (entity->has<sprite::sprite>()) continue;
+    // if (entity->has<tile::tile>()) continue;
+    // if (entity->has<sprite::sprite>()) continue;
     auto boundary_val = entity->try_get<boundary>();
     SDL_Rect rect;
     rect.x = static_cast<int>(std::roundf((transform_val->position.x - offsetX) * 36.0));
@@ -104,7 +104,7 @@ void game::render() {
       rect.h = boundary_val->rect.max.y * 36;
     }
     SDL_SetRenderDrawColor(mRenderer, 255, 0, 0, 255);
-    SDL_RenderFillRect(mRenderer, &rect);
+    SDL_RenderDrawRect(mRenderer, &rect);
   }
 
   // Render collisions
