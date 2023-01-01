@@ -29,9 +29,10 @@ void game::init() {
     auto& physics_val = entity->set<physics::physics>();
     physics_val.hasCollisionHandler = true;
     auto& boundary_val = entity->set<boundary>();
-    boundary_val.rect.max = glm::vec3(1.0, 1.0, 1.0);
+    boundary_val.rect.min = glm::vec3(0.3, 0.5, 1.0);
+    boundary_val.rect.max = glm::vec3(1.1, 1.4, 1.0);
     entity->set<player::player>();
-    entity->set<sprite::sprite>({ "player-idle", 0, { glm::vec3(0.0, 0.0, 0.0), glm::vec3(1.0, 1.0, 1.0) } });
+    entity->set<sprite::sprite>({ "player-idle", 0, { glm::vec3(0.0, 0.0, 0.0), glm::vec3(1.4, 1.4, 1.0) } });
   }
   {
     // box
@@ -54,7 +55,7 @@ void game::init() {
     physics_val.hasCollisionHandler = true;
     auto& boundary_val = entity->set<boundary>();
     boundary_val.rect.max = glm::vec3(2.0, 2.0, 2.0);
-    entity->set<sprite::sprite>({ "tile2", 26 });
+    entity->set<sprite::sprite>({ "tile2", 26, { glm::vec3(0.0, 0.0, 0.0), glm::vec3(2.0, 2.0, 2.0) } });
   }
 }
 
@@ -98,10 +99,10 @@ void game::render() {
     rect.w = 36;
     rect.h = 36;
     if (boundary_val != nullptr) {
-      rect.x -= boundary_val->rect.min.x * 36;
-      rect.y -= boundary_val->rect.min.y * 36;
-      rect.w = boundary_val->rect.max.x * 36;
-      rect.h = boundary_val->rect.max.y * 36;
+      rect.x += boundary_val->rect.min.x * 36;
+      rect.y += boundary_val->rect.min.y * 36;
+      rect.w = (boundary_val->rect.max.x - boundary_val->rect.min.x) * 36;
+      rect.h = (boundary_val->rect.max.y - boundary_val->rect.min.y) * 36;
     }
     SDL_SetRenderDrawColor(mRenderer, 255, 0, 0, 255);
     SDL_RenderDrawRect(mRenderer, &rect);
