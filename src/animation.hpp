@@ -5,6 +5,17 @@
 #include <list>
 #include <string>
 
+/*
+Player animation, or any other animation consists of various states.
+Each animation has start, loop, end. Basically, the animation is a state machine
+that never stops.
+
+When the player performs different action, the state machine will try to divert
+to non-default action. For example, if the player tries to jump,
+the 'standing' animation may be interrupted, and the state changes to jump
+starting animation, flying animation, and so on.
+*/
+
 namespace animation {
   class animation_state {
     public:
