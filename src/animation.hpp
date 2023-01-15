@@ -14,6 +14,25 @@ When the player performs different action, the state machine will try to divert
 to non-default action. For example, if the player tries to jump,
 the 'standing' animation may be interrupted, and the state changes to jump
 starting animation, flying animation, and so on.
+
+  idle -idle-> idle
+  idle -walk-> walking
+  idle -run-> walking
+  walking -idle-> idle
+  walking -walk-> walking
+  walking -run-> running
+  walking -jump-> jumpingForward
+  ...etc...
+
+In a sense, there is a directed graph between each animations, and the
+"current intent" chooses the best possible path.
+
+We can make it choose best possible destination and run path-finding to it,
+but that's completely unnecessary - we can just build each intent to each path.
+
+However, it's not really easy to make each intent clear - there would be various
+conditions that trigger certain animation, etc. But this mechanism needs some
+kind of scripting, which isn't really necessary at this point.
 */
 
 namespace animation {
