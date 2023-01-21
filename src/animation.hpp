@@ -33,13 +33,24 @@ but that's completely unnecessary - we can just build each intent to each path.
 However, it's not really easy to make each intent clear - there would be various
 conditions that trigger certain animation, etc. But this mechanism needs some
 kind of scripting, which isn't really necessary at this point.
+
+So, at this point, the game logic itself should provide a list of current
+intent, and that alone should determine the animation state.
+
+Furthermore, each "action" should define if it should interrupt current state,
+however I'm not sure if it should be done programtically, or automatically.
 */
 
 namespace animation {
+  class animation_edge {
+    std::string next_state;
+    bool is_interruptable;
+  };
+
   class animation_state {
     public:
     std::string name;
-    std::map<std::string, std::string> actions;
+    std::map<std::string, animation_edge> edges;
     float duration;
   };
 
