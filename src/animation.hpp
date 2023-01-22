@@ -52,18 +52,19 @@ namespace animation {
     std::string name;
     std::map<std::string, animation_edge> edges;
     float duration;
-  };
 
-  class animation_action {
-    public:
-    std::string name;
+    void add_edge(std::string action_name, std::string next_state, bool is_interruptable);
+    void remove_edge(std::string action_name);
   };
 
   class animation_definition {
     public:
     std::string initial_state;
     std::map<std::string, animation_state> states;
-    std::map<std::string, animation_action> actions;
+    std::list<std::string> actions;
+
+    void add_state(animation_state state);
+    void remove_state(std::string name);
   };
 
   class animation {
