@@ -4,6 +4,10 @@
 #include <map>
 #include <list>
 #include <string>
+#include <functional>
+
+#include "game.hpp"
+#include "entity.hpp"
 
 /*
 Player animation, or any other animation consists of various states.
@@ -43,8 +47,8 @@ however I'm not sure if it should be done programtically, or automatically.
 
 namespace animation {
   class animation_edge {
-    std::string next_state;
-    bool is_interruptable;
+    std::string nextState;
+    bool isInterruptable;
   };
 
   class animation_state {
@@ -52,19 +56,20 @@ namespace animation {
     std::string name;
     std::map<std::string, animation_edge> edges;
     float duration;
+    std::function<void(entity, float)> updateFunction;
 
-    void add_edge(std::string action_name, std::string next_state, bool is_interruptable);
-    void remove_edge(std::string action_name);
+    void addEdge(std::string action_name, std::string next_state, bool is_interruptable);
+    void removeEdge(std::string action_name);
   };
 
   class animation_definition {
     public:
-    std::string initial_state;
+    std::string initialState;
     std::map<std::string, animation_state> states;
     std::list<std::string> actions;
 
-    void add_state(animation_state state);
-    void remove_state(std::string name);
+    void addState(animation_state state);
+    void removeState(std::string name);
   };
 
   class animation {
@@ -73,6 +78,8 @@ namespace animation {
     float time;
     animation_definition& definition;
   };
+
+  void updateAnimation(game& game);
 }
 
 #endif // ANIMATION_HPP_
