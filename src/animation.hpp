@@ -47,8 +47,13 @@ however I'm not sure if it should be done programtically, or automatically.
 
 namespace animation {
   class animation_edge {
+    public:
     std::string nextState;
     bool isInterruptable;
+
+    animation_edge(std::string& pNextState, bool pIsInterruptable):
+      nextState(pNextState),
+      isInterruptable(pIsInterruptable) {};
   };
 
   class animation_state {
@@ -58,8 +63,8 @@ namespace animation {
     float duration;
     std::function<void(entity, float)> updateFunction;
 
-    void addEdge(std::string action_name, std::string next_state, bool is_interruptable);
-    void removeEdge(std::string action_name);
+    void addEdge(std::string& actionName, std::string& nextState, bool isInterruptable);
+    void removeEdge(std::string& actionName);
   };
 
   class animation_definition {
