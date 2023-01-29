@@ -64,7 +64,7 @@ namespace animation {
     std::function<void(entity, float)> updateFunction;
 
     void addEdge(std::string& actionName, std::string& nextState, bool isInterruptable);
-    void removeEdge(std::string& actionName);
+    void removeEdge(const std::string& actionName);
   };
 
   class animation_definition {
@@ -73,8 +73,8 @@ namespace animation {
     std::map<std::string, animation_state> states;
     std::list<std::string> actions;
 
-    void addState(animation_state state);
-    void removeState(std::string name);
+    void addState(animation_state& state);
+    void removeState(const std::string& name);
   };
 
   class animation {
