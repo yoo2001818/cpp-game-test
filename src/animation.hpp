@@ -61,7 +61,7 @@ namespace animation {
     std::string name;
     std::map<std::string, animation_edge> edges;
     float duration;
-    std::function<void(entity, float)> updateFunction;
+    std::function<void(entity&, float)> updateFunction;
 
     void addEdge(std::string& actionName, std::string& nextState, bool isInterruptable);
     void removeEdge(const std::string& actionName);
@@ -84,7 +84,7 @@ namespace animation {
     animation_definition& definition;
   };
 
-  void updateAnimation(game& game);
+  void updateAnimation(game& game, float deltaTime);
 }
 
 #endif // ANIMATION_HPP_

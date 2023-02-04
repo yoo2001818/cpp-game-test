@@ -20,9 +20,15 @@ void animation::animation_definition::removeState(const std::string& name) {
   this->states.erase(name);
 }
 
-void animation::updateAnimation(game& game) {
+void animation::updateAnimation(game& game, float deltaTime) {
   auto query = game.mWorld.getQuery<animation>();
   for (auto entity : query) {
     auto animation_val = entity->get<animation>();
+    animation_val.time += deltaTime;
+    auto& state = animation_val.state;
+    state.updateFunction(*entity, animation_val.time);
+    if (state.duration <= animation_val.time) {
+      // Find next edge and continue
+    }
   }
 }
