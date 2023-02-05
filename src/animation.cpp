@@ -29,6 +29,8 @@ void animation::updateAnimation(game& game, float deltaTime) {
     state.updateFunction(*entity, animation_val.time);
     if (state.duration <= animation_val.time) {
       // Find next edge and continue
+      auto& name = animation_val.action_name;
+      auto cursor = state.edges.find(name);
     }
   }
 }

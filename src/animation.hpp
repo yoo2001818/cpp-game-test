@@ -82,6 +82,7 @@ namespace animation {
     animation_state& state;
     float time;
     animation_definition& definition;
+    std::string action_name;
   };
 
   void updateAnimation(game& game, float deltaTime);
