@@ -133,8 +133,8 @@ void game::render() {
     for (auto collision : physics_val->collisions) {
       SDL_SetRenderDrawColor(mRenderer, 0, 0, 255, 255);
       SDL_Rect rect {
-        (collision.position.x - offsetX) * 36.0 - 8,
-        (collision.position.y - offsetY) * 36.0 - 8,
+        static_cast<int>((collision.position.x - offsetX) * 36.0 - 8),
+        static_cast<int>((collision.position.y - offsetY) * 36.0 - 8),
         16,
         16
       };
