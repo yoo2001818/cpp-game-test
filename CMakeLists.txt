@@ -4,9 +4,11 @@ project(CppGameTest)
 
 set(CMAKE_CXX_STANDARD 20)
 set(CMAKE_CXX_STANDARD_REQUIRED True)
+set(OpenGL_GL_PREFERENCE GLVND)
 
 find_package(Vulkan REQUIRED)
 find_package(glm REQUIRED)
+find_package(OpenGL REQUIRED)
 include(FetchContent)
 include(FindPkgConfig)
 
@@ -29,13 +31,15 @@ include_directories(${SDL2_INCLUDE_DIRS})
 include_directories(${SDL2_IMAGE_INCLUDE_DIRS})
 include_directories(${SDL2_TTF_INCLUDE_DIRS})
 include_directories(${GLM_INCLUDE_DIRS})
+include_directories(${OPENGL_INCLUDE_DIRS})
 
 include_directories(${PROJECT_SOURCE_DIR}/src)
-file(GLOB SOURCES ${PROJECT_SOURCE_DIR}/src/**/*.cpp)
+file(GLOB SOURCES ${PROJECT_SOURCE_DIR}/src/3dtest/*.cpp)
 add_executable(CppGameTest ${SOURCES})
 target_link_libraries(CppGameTest ${SDL2_LIBRARIES})
 target_link_libraries(CppGameTest ${SDL2_IMAGE_LIBRARIES})
 target_link_libraries(CppGameTest ${SDL2_TTF_LIBRARIES})
+target_link_libraries(CppGameTest ${OPENGL_LIBRARIES})
 
 # file(GLOB TEST_SOURCES ${PROJECT_SOURCE_DIR}/test/*.cpp)
 # list(APPEND TEST_SOURCES ${SOURCES})
