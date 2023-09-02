@@ -14,6 +14,9 @@ int main() {
     return 1;
   }
 
+  SDL_GL_SetAttribute(SDL_GL_CONTEXT_MAJOR_VERSION, 2);
+  SDL_GL_SetAttribute(SDL_GL_CONTEXT_MAJOR_VERSION, 1);
+
   SDL_Window *window;
 
   window =
@@ -42,6 +45,14 @@ int main() {
       glViewport(0, 0, 1024, 768);
       glClearColor(1.0f, 1.0f, 1.0f, 0.0f);
       glClear(GL_COLOR_BUFFER_BIT);
+
+      glColor4f(0.0f, 0.0f, 0.0f, 1.0f);
+      glBegin(GL_QUADS);
+      glVertex2f(-0.5f, -0.5f);
+      glVertex2f(0.5f, -0.5f);
+      glVertex2f(0.5f, 0.5f);
+      glVertex2f(-0.5f, 0.5f);
+      glEnd();
 
       SDL_GL_SwapWindow(window);
 
