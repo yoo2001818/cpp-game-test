@@ -1,4 +1,4 @@
-#include <GL/gl.h>
+#include <GL/glew.h>
 #include <SDL2/SDL.h>
 #include <SDL2/SDL_opengl.h>
 #include <SDL2/SDL_video.h>
@@ -29,6 +29,13 @@ int main() {
   }
 
   SDL_GLContext context = SDL_GL_CreateContext(window);
+  SDL_GL_MakeCurrent(window, context);
+  if (glewInit() != GLEW_OK) {
+    return 1;
+  }
+
+  unsigned int vbo;
+  glGenBuffers(1, &vbo);
 
   {
     while (true) {
