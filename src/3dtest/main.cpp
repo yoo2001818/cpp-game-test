@@ -41,12 +41,10 @@ int main() {
   unsigned int vbo;
   glGenBuffers(1, &vbo);
   glBindBuffer(GL_ARRAY_BUFFER, vbo);
-  glBufferData(GL_ARRAY_BUFFER, sizeof(vertices), vertices, GL_STATIC_DRAW);
-
-  unsigned int vbo2;
-  glGenBuffers(1, &vbo2);
-  glBindBuffer(GL_ARRAY_BUFFER, vbo2);
-  glBufferData(GL_ARRAY_BUFFER, sizeof(colors), colors, GL_STATIC_DRAW);
+  glBufferData(GL_ARRAY_BUFFER, sizeof(vertices) + sizeof(colors), nullptr,
+               GL_STATIC_DRAW);
+  glBufferSubData(GL_ARRAY_BUFFER, 0, sizeof(vertices), vertices);
+  glBufferSubData(GL_ARRAY_BUFFER, sizeof(vertices), sizeof(colors), colors);
 
   unsigned int ebo;
   glGenBuffers(1, &ebo);
@@ -61,9 +59,8 @@ int main() {
   glBindBuffer(GL_ARRAY_BUFFER, vbo);
   glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(float), (void *)0);
   glEnableVertexAttribArray(0);
-
-  glBindBuffer(GL_ARRAY_BUFFER, vbo2);
-  glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(float), (void *)0);
+  glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(float),
+                        (void *)(3 * 3 * sizeof(float)));
   glEnableVertexAttribArray(1);
 
   const char *vertexShaderSource =
