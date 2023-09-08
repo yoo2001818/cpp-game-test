@@ -3,6 +3,7 @@
 
 #include "glm/mat4x4.hpp"
 #include <glm/ext/matrix_float4x4.hpp>
+#include <glm/ext/vector_float3.hpp>
 #include <optional>
 #include <string>
 #include <vector>
@@ -14,6 +15,17 @@ public:
   std::vector<entity> mEntities;
 };
 typedef glm::mat4x4 transform;
+class geometry {
+public:
+  unsigned int mVbo;
+  std::vector<glm::vec3> mPosition;
+  std::vector<glm::vec2> mTexCoord;
+  std::vector<glm::vec3> mNormal;
+};
+class material {
+public:
+  unsigned int mProgram;
+};
 class mesh {
 public:
 };
