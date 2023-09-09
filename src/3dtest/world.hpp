@@ -4,6 +4,8 @@
 #include "glm/mat4x4.hpp"
 #include <glm/ext/matrix_float4x4.hpp>
 #include <glm/ext/vector_float3.hpp>
+#include <map>
+#include <memory>
 #include <optional>
 #include <string>
 #include <vector>
@@ -22,12 +24,22 @@ public:
   std::vector<glm::vec2> mTexCoord;
   std::vector<glm::vec3> mNormal;
 };
-class material {
+class shader {
 public:
   unsigned int mProgram;
+  std::string mVertexShader;
+  std::string mFragmentShader;
+};
+class material {
+public:
+  std::shared_ptr<shader> mShader;
+  // TODO ???
+  std::map<std::string, void *> mUniforms;
 };
 class mesh {
 public:
+  std::shared_ptr<geometry> mGeometry;
+  std::shared_ptr<material> mMaterial;
 };
 class light {
 public:
