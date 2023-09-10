@@ -17,12 +17,23 @@ public:
   std::vector<entity> mEntities;
 };
 typedef glm::mat4x4 transform;
+class aabb {
+public:
+  glm::vec3 min;
+  glm::vec3 max;
+};
 class geometry {
 public:
   unsigned int mVbo;
-  std::vector<glm::vec3> mPosition;
-  std::vector<glm::vec2> mTexCoord;
-  std::vector<glm::vec3> mNormal;
+  std::vector<glm::vec3> mPositions;
+  std::vector<glm::vec2> mTexCoords;
+  std::vector<glm::vec3> mNormals;
+  std::vector<glm::vec3> mTangents;
+  aabb mBounds;
+  int mPolyCount;
+  int mType;
+  float mLodThreshold;
+  std::map<int, unsigned int> mVaos;
 };
 class shader {
 public:
@@ -38,8 +49,8 @@ public:
 };
 class mesh {
 public:
-  std::shared_ptr<geometry> mGeometry;
-  std::shared_ptr<material> mMaterial;
+  std::vector<std::vector<std::shared_ptr<geometry>>> mGeometries;
+  std::vector<std::shared_ptr<material>> mMaterials;
 };
 class light {
 public:
