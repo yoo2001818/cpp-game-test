@@ -43,9 +43,11 @@ public:
 };
 class material {
 public:
-  std::shared_ptr<shader> mShader;
-  // TODO ???
-  std::map<std::string, void *> mUniforms;
+  virtual void render() = 0;
+};
+class standard_material : public material {
+public:
+  virtual void render();
 };
 class mesh {
 public:
