@@ -1,6 +1,7 @@
 #ifndef __WORLD_HPP__
 #define __WORLD_HPP__
 
+#include "geometry.hpp"
 #include "glm/mat4x4.hpp"
 #include <glm/ext/matrix_float4x4.hpp>
 #include <glm/ext/vector_float3.hpp>
@@ -17,24 +18,6 @@ public:
   std::vector<entity> mEntities;
 };
 typedef glm::mat4x4 transform;
-class aabb {
-public:
-  glm::vec3 min;
-  glm::vec3 max;
-};
-class geometry {
-public:
-  unsigned int mVbo;
-  std::vector<glm::vec3> mPositions;
-  std::vector<glm::vec2> mTexCoords;
-  std::vector<glm::vec3> mNormals;
-  std::vector<glm::vec3> mTangents;
-  aabb mBounds;
-  int mPolyCount;
-  int mType;
-  float mLodThreshold;
-  std::map<int, unsigned int> mVaos;
-};
 class shader {
 public:
   unsigned int mProgram;
@@ -51,7 +34,7 @@ public:
 };
 class mesh {
 public:
-  std::vector<std::vector<std::shared_ptr<geometry>>> mGeometries;
+  std::vector<std::vector<std::shared_ptr<render::geometry>>> mGeometries;
   std::vector<std::shared_ptr<material>> mMaterials;
 };
 class light {
