@@ -29,6 +29,7 @@ public:
   int mType;
   // float mLodThreshold;
 };
+geometry make_box();
 } // namespace render
 
 #endif // __GEOMETRY_HPP__
