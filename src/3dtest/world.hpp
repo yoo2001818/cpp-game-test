@@ -48,6 +48,8 @@ public:
 };
 class light {
 public:
+  glm::vec3 mColor;
+  float intensity;
 };
 class camera {
 public:
