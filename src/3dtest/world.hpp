@@ -72,4 +72,19 @@ public:
 };
 }; // namespace world
 
+/*
+world mWorld;
+
+std::shared_ptr<geometry> mGeom = mWorld.createGeometry();
+std::shared_ptr<material> mMaterial = mWorld.createMaterial();
+
+entity& mEntity = mWorld.create();
+mEntity.mLight = { vec3(0.0, 1.0, 1.0), 5.0f };
+mEntity.mMesh = { mGeom, { mMaterial } };
+mEntity.mTransform = { ... };
+
+entity& mChild = mWorld.create();
+mEntity.addChild(mChild);
+
+*/
 #endif // __WORLD_HPP__
