@@ -24,6 +24,7 @@ public:
   std::vector<glm::vec2> mTexCoords;
   std::vector<glm::vec3> mNormals;
   std::vector<glm::vec3> mTangents;
+  std::vector<int> mIndices;
   // aabb mBounds;
   // int mPolyCount;
   int mType;
