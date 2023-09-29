@@ -63,6 +63,8 @@ public:
   std::optional<mesh> mMesh;
   std::optional<light> mLight;
   std::optional<camera> mCamera;
+  // Do we need to support dynamic entity shape like archetype, or entity
+  // groups? If so, how should be the polymorphism implemented?
 };
 class world {
 public:
