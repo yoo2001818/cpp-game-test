@@ -43,7 +43,7 @@ public:
 };
 class mesh {
 public:
-  std::vector<std::vector<std::shared_ptr<render::geometry>>> mGeometries;
+  std::vector<std::shared_ptr<render::geometry>> mGeometries;
   std::vector<std::shared_ptr<material>> mMaterials;
 };
 class light {
@@ -71,6 +71,8 @@ public:
   std::vector<entity> mEntities;
   std::vector<std::shared_ptr<render::geometry>> mGeometries;
   std::vector<std::shared_ptr<material>> mMaterials;
+
+  entity &create();
 };
 }; // namespace world
 

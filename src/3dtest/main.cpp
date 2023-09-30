@@ -1,3 +1,5 @@
+#include "3dtest/geometry.hpp"
+#include "world.hpp"
 #include <GL/glew.h>
 #include <SDL2/SDL.h>
 #include <SDL2/SDL_opengl.h>
@@ -5,6 +7,7 @@
 #include <cstdlib>
 #include <ctime>
 #include <iostream>
+#include <memory>
 
 int main() {
   std::srand(std::time(nullptr));
@@ -100,6 +103,17 @@ int main() {
 
   glDeleteShader(vertexShader);
   glDeleteShader(fragmentShader);
+
+  world::world mWorld;
+
+  auto mGeom = std::make_shared<render::geometry>(render::make_box());
+  auto mMaterial = std::make_shared<world::standard_material>();
+
+  mWorld.mEntities.push_back({});
+  world::entity &mEntity = mWorld.mEntities.back();
+
+  mEntity.mMesh = {{mGeom}, {mMaterial}};
+  mEntity.mName = "Test";
 
   {
     while (true) {
