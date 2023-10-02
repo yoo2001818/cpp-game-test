@@ -109,8 +109,7 @@ int main() {
   auto mGeom = std::make_shared<render::geometry>(render::make_box());
   auto mMaterial = std::make_shared<world::standard_material>();
 
-  mWorld.mEntities.push_back({});
-  world::entity &mEntity = mWorld.mEntities.back();
+  auto &mEntity = mWorld.create();
 
   mEntity.mMesh = {{mGeom}, {mMaterial}};
   mEntity.mName = "Test";

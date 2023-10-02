@@ -55,14 +55,17 @@ class camera {
 public:
   glm::mat4x4 mView;
 };
+typedef int entity_id;
 class entity {
 public:
+  entity_id mId;
   std::vector<entity> mChildren;
   transform mTransform;
   std::string mName;
   std::optional<mesh> mMesh;
   std::optional<light> mLight;
   std::optional<camera> mCamera;
+  std::optional<entity_id> mParent;
   // Do we need to support dynamic entity shape like archetype, or entity
   // groups? If so, how should be the polymorphism implemented?
 };
@@ -71,6 +74,7 @@ public:
   std::vector<entity> mEntities;
   std::vector<std::shared_ptr<render::geometry>> mGeometries;
   std::vector<std::shared_ptr<material>> mMaterials;
+  entity_id mIdCounter;
 
   entity &create();
 };
