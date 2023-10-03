@@ -1,4 +1,5 @@
-#include "3dtest/geometry.hpp"
+#include "geometry.hpp"
+#include "render.hpp"
 #include "world.hpp"
 #include <GL/glew.h>
 #include <SDL2/SDL.h>
@@ -104,15 +105,15 @@ int main() {
   glDeleteShader(vertexShader);
   glDeleteShader(fragmentShader);
 
-  world::world mWorld;
+  world mWorld;
 
   auto mGeom = std::make_shared<render::geometry>(render::make_box());
-  auto mMaterial = std::make_shared<world::standard_material>();
+  auto mMaterial = std::make_shared<render::standard_material>();
 
-  auto &mEntity = mWorld.create();
+  auto mEntity = mWorld.create();
 
-  mEntity.mMesh = {{mGeom}, {mMaterial}};
-  mEntity.mName = "Test";
+  mEntity->set<render::mesh>({{mGeom}, {mMaterial}});
+  mEntity->set<render::transform>({});
 
   {
     while (true) {

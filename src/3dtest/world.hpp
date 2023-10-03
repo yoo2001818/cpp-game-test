@@ -1,98 +1,135 @@
-#ifndef __WORLD_HPP__
-#define __WORLD_HPP__
+#ifndef WORLD_HPP_
+#define WORLD_HPP_
 
-#include "geometry.hpp"
-#include "glm/mat4x4.hpp"
-#include <glm/ext/matrix_float4x4.hpp>
-#include <glm/ext/vector_float2.hpp>
-#include <glm/ext/vector_float3.hpp>
-#include <map>
+#include "entity.hpp"
+#include <cstddef>
+#include <cstdint>
+#include <iterator>
 #include <memory>
-#include <optional>
-#include <string>
+#include <stack>
 #include <vector>
 
-namespace world {
-typedef glm::mat4x4 transform;
-class shader {
+template <class base_t, class filter_t> struct filtered_iterator {
 public:
-  unsigned int mProgram;
-  std::string mVertexShader;
-  std::string mFragmentShader;
-};
-class texture {
-public:
-  unsigned int mTexture;
-};
-class material {
-public:
-  virtual void render() = 0;
-};
-class standard_material : public material {
-public:
-  glm::vec3 mAlbedo;
-  std::shared_ptr<texture> mAlbedoTexture;
-  float mMetalic;
-  std::shared_ptr<texture> mMetalicTexture;
-  float mRoughness;
-  std::shared_ptr<texture> mRoughnessTexture;
-  std::shared_ptr<texture> mNormal;
-  glm::vec2 mTexScale;
+  using iterator_category = std::forward_iterator_tag;
+  using difference_type = std::ptrdiff_t;
+  using value_type = std::shared_ptr<entity>;
+  using pointer = value_type *;
+  using reference = value_type &;
 
-  virtual void render();
+  using base_iterator = base_t;
+
+  filtered_iterator(base_iterator pIterator, base_iterator pEnd,
+                    filter_t pFilter)
+      : mIterator(pIterator), mEnd(pEnd), mFilter(pFilter) {
+    skipToValid();
+  };
+  filtered_iterator(const filtered_iterator &) = default;
+  ~filtered_iterator(){};
+  filtered_iterator &operator=(const filtered_iterator &target) {
+    mIterator = target.mIterator;
+    return *this;
+  };
+  filtered_iterator &operator++() {
+    ++mIterator;
+    skipToValid();
+    return *this;
+  };
+  filtered_iterator operator++(int) {
+    filtered_iterator copy(*this);
+    mIterator++;
+    skipToValid();
+    return copy;
+  };
+  reference operator*() const { return *mIterator; };
+  pointer operator->() const { return &*mIterator; };
+  friend void swap(filtered_iterator &lhs, filtered_iterator &rhs) {
+    std::swap(lhs.mIterator, rhs.mIterator);
+  };
+  friend bool operator==(const filtered_iterator &lhs,
+                         const filtered_iterator &rhs) {
+    return lhs.mIterator == rhs.mIterator;
+  };
+  friend bool operator!=(const filtered_iterator &lhs,
+                         const filtered_iterator &rhs) {
+    return lhs.mIterator != rhs.mIterator;
+  };
+
+private:
+  base_iterator mIterator;
+  base_iterator mEnd;
+  filter_t mFilter;
+
+  void skipToValid() {
+    while (mIterator != mEnd) {
+      if (mFilter.test(**mIterator))
+        return;
+      mIterator++;
+    }
+  }
 };
-class mesh {
-public:
-  std::vector<std::shared_ptr<render::geometry>> mGeometries;
-  std::vector<std::shared_ptr<material>> mMaterials;
-};
-class light {
-public:
-  glm::vec3 mColor;
-  float intensity;
-};
-class camera {
-public:
-  glm::mat4x4 mView;
-};
-typedef int entity_id;
-class entity {
-public:
-  entity_id mId;
-  std::vector<entity> mChildren;
-  transform mTransform;
-  std::string mName;
-  std::optional<mesh> mMesh;
-  std::optional<light> mLight;
-  std::optional<camera> mCamera;
-  std::optional<entity_id> mParent;
-  // Do we need to support dynamic entity shape like archetype, or entity
-  // groups? If so, how should be the polymorphism implemented?
-};
+
 class world {
 public:
-  std::vector<entity> mEntities;
-  std::vector<std::shared_ptr<render::geometry>> mGeometries;
-  std::vector<std::shared_ptr<material>> mMaterials;
-  entity_id mIdCounter;
+  class entity_filter {
+  public:
+    bool test(entity &entity) { return entity.isAlive(); };
+  };
+  using entity_iterator =
+      filtered_iterator<std::vector<std::shared_ptr<entity>>::iterator,
+                        entity_filter>;
+  template <class T, class... Ts> class query {
+  public:
+    class filter {
+    public:
+      bool test(entity &entity) {
+        return mParent.test(entity) && entity.has<T>();
+      };
+      query<Ts...>::filter mParent;
+    };
+    using iterator = filtered_iterator<entity_iterator, filter>;
+    query(world *pWorld) : mWorld(pWorld){};
+    iterator begin() { return iterator(mWorld->begin(), mWorld->end(), {}); };
+    iterator end() { return iterator(mWorld->end(), mWorld->end(), {}); };
 
-  entity &create();
+  private:
+    world *mWorld;
+  };
+  template <class T> class query<T> {
+  public:
+    class filter {
+    public:
+      bool test(entity &entity) { return entity.has<T>(); };
+    };
+    using iterator = filtered_iterator<entity_iterator, filter>;
+    query(world *pWorld) : mWorld(pWorld){};
+    iterator begin() { return iterator(mWorld->begin(), mWorld->end(), {}); };
+    iterator end() { return iterator(mWorld->end(), mWorld->end(), {}); };
+
+  private:
+    world *mWorld;
+  };
+  std::vector<std::shared_ptr<entity>> mEntityList;
+
+  world()
+      : mEntityList(), mDeadEntityList(), mDirtyEntityList(), mEntityCount(0){};
+
+  std::shared_ptr<entity> create();
+  std::shared_ptr<entity> add(entity &&entity);
+  void remove(const entity &entity);
+  void remove(const entity_id &entity);
+  std::shared_ptr<entity> get(const entity_id &id) const;
+  entity_iterator begin();
+  entity_iterator end();
+  void markDirty(const entity &entity);
+  void markDirty(const entity_id &id);
+  void updateIndex();
+  template <class... Ts> query<Ts...> getQuery() { return {this}; };
+
+private:
+  std::stack<std::shared_ptr<entity>> mDeadEntityList;
+  std::stack<entity_id> mDirtyEntityList;
+  uint32_t mEntityCount;
 };
-}; // namespace world
 
-/*
-world mWorld;
-
-std::shared_ptr<geometry> mGeom = mWorld.createGeometry();
-std::shared_ptr<material> mMaterial = mWorld.createMaterial();
-
-entity& mEntity = mWorld.create();
-mEntity.mLight = { vec3(0.0, 1.0, 1.0), 5.0f };
-mEntity.mMesh = { mGeom, { mMaterial } };
-mEntity.mTransform = { ... };
-
-entity& mChild = mWorld.create();
-mEntity.addChild(mChild);
-
-*/
-#endif // __WORLD_HPP__
+#endif // WORLD_HPP_
