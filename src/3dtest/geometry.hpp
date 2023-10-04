@@ -10,7 +10,6 @@
 #include <string>
 #include <vector>
 
-namespace render {
 class aabb {
 public:
   glm::vec3 min;
@@ -31,6 +30,5 @@ public:
   // float mLodThreshold;
 };
 geometry make_box();
-} // namespace render
 
 #endif // __GEOMETRY_HPP__
