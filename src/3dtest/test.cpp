@@ -89,3 +89,7 @@ std::vector<entity>::iterator entity_store::end() {
 };
 
 entity_store &world::get_entity_store() { return this->mEntityStore; }
+
+void world::update() {}
+
+void world::render() {}

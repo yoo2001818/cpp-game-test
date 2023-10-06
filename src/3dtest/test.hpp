@@ -98,6 +98,8 @@ private:
 class world {
 public:
   entity_store &get_entity_store();
+  void update();
+  void render();
 
 private:
   entity_store mEntityStore;
