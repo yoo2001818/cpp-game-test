@@ -1,5 +1,6 @@
 #include "test.hpp"
 #include "3dtest/geometry.hpp"
+#include <GL/glew.h>
 #include <functional>
 #include <glm/ext/matrix_clip_space.hpp>
 #include <glm/ext/matrix_transform.hpp>
@@ -29,6 +30,34 @@ void transform::reset() { this->mMatrix = glm::mat4(1.0); }
 
 glm::mat4 &transform::getMatrix() { return this->mMatrix; }
 glm::mat4 transform::getInverseMatrix() { return glm::inverse(this->mMatrix); }
+
+void material::prepare() {
+  if (this->mProgramId == -1) {
+    auto vs = glCreateShader(GL_VERTEX_SHADER);
+    // FIXME
+    glShaderSource(vs, 1, nullptr, NULL);
+    glCompileShader(vs);
+
+    auto fs = glCreateShader(GL_FRAGMENT_SHADER);
+    glShaderSource(fs, 1, nullptr, NULL);
+    glCompileShader(fs);
+
+    this->mProgramId = glCreateProgram();
+    glAttachShader(this->mProgramId, vs);
+    glAttachShader(this->mProgramId, fs);
+    glLinkProgram(this->mProgramId);
+
+    glDeleteShader(vs);
+    glDeleteShader(fs);
+  }
+  glUseProgram(this->mProgramId);
+}
+void material::dispose() {
+  if (this->mProgramId != -1) {
+    glDeleteProgram(this->mProgramId);
+    this->mProgramId = -1;
+  }
+}
 
 glm::mat4 camera::getProjection(float pAspect) {
   switch (this->type) {

@@ -24,7 +24,11 @@ private:
 };
 class material {
 public:
-  int placeholder;
+  unsigned int mVertexShaderId = -1;
+  unsigned int mFragmentShaderId = -1;
+  unsigned int mProgramId = -1;
+  void prepare();
+  void dispose();
 };
 struct mesh {
   std::vector<std::shared_ptr<geometry>> geometries;
