@@ -1,9 +1,13 @@
 #include "test.hpp"
+#include "3dtest/geometry.hpp"
 #include <functional>
 #include <glm/ext/matrix_clip_space.hpp>
 #include <glm/ext/matrix_transform.hpp>
+#include <glm/ext/vector_float3.hpp>
 #include <glm/gtx/transform.hpp>
 #include <glm/matrix.hpp>
+#include <memory>
+#include <numbers>
 
 void transform::translate(glm::vec3 pPosition) {
   this->mMatrix = glm::translate(this->mMatrix, pPosition);
@@ -21,6 +25,7 @@ void transform::lookAt(glm::vec3 pTarget) {
   glm::vec4 eyePos = this->mMatrix * glm::vec4(0.0f, 0.0f, 0.0f, 1.0f);
   glm::lookAt(glm::vec3(eyePos), pTarget, glm::vec3(0.0, 1.0, 0.0));
 }
+void transform::reset() { this->mMatrix = glm::mat4(1.0); }
 
 glm::mat4 &transform::getMatrix() { return this->mMatrix; }
 glm::mat4 transform::getInverseMatrix() { return glm::inverse(this->mMatrix); }
@@ -41,7 +46,6 @@ const entity_id &entity::id() const { return this->mId; }
 const bool entity::is_valid() const { return this->mIsValid; }
 void entity::dispose() {
   this->transform.reset();
-  this->material.reset();
   this->mesh.reset();
   this->light.reset();
   this->camera.reset();
@@ -90,6 +94,57 @@ std::vector<entity>::iterator entity_store::end() {
 
 entity_store &world::get_entity_store() { return this->mEntityStore; }
 
-void world::update() {}
+void world::init() {
+  auto &entity_store = this->get_entity_store();
+  {
+    auto &cube = entity_store.create_entity();
+    cube.name = "cube";
+    cube.transform = {};
+    cube.transform->translate(glm::vec3(0.0, 0.0, 0.0));
+    cube.mesh = {};
+    cube.mesh->geometries.push_back(std::make_shared<geometry>(make_box()));
+    cube.mesh->materials.push_back(std::make_shared<material>());
+  }
+  {
+    auto &camera = entity_store.create_entity();
+    camera.name = "camera";
+    camera.transform = {};
+    camera.transform->translate(glm::vec3(0.0, 5.0, 5.0));
+    camera.transform->lookAt(glm::vec3(0.0));
+    camera.camera = {};
+    camera.camera->type = camera::PERSPECTIVE;
+    camera.camera->near = 0.1f;
+    camera.camera->far = 100.0f;
+    camera.camera->fov = std::numbers::pi * 90.0f;
+  }
+}
 
-void world::render() {}
+void world::update() {
+  auto &entity_store = this->get_entity_store();
+  for (auto it = entity_store.begin(); it != entity_store.end(); it++) {
+    auto &entity = *it;
+    if (entity.name == "cube") {
+      entity.transform->rotateY(0.1f);
+    }
+  }
+}
+
+void world::render() {
+  auto &entity_store = this->get_entity_store();
+  // Grab camera first; this does't look pretty
+  entity *camera = nullptr;
+  for (auto it = entity_store.begin(); it != entity_store.end(); it++) {
+    auto &entity = *it;
+    if (entity.camera != nullptr && entity.transform != nullptr) {
+      camera = &entity;
+    }
+  }
+  if (camera == nullptr) {
+    return;
+  }
+  for (auto it = entity_store.begin(); it != entity_store.end(); it++) {
+    auto &entity = *it;
+    if (entity.mesh != nullptr && entity.transform != nullptr) {
+    }
+  }
+}

@@ -15,6 +15,7 @@ public:
   void rotateY(float pAngle);
   void rotateZ(float pAngle);
   void lookAt(glm::vec3 pTarget);
+  void reset();
   glm::mat4 &getMatrix();
   glm::mat4 getInverseMatrix();
 
@@ -62,10 +63,10 @@ public:
   // NOTE: We use shared pointers here since we don't know actual types here,
   // and we don't know how it will go
   std::unique_ptr<transform> transform;
-  std::unique_ptr<material> material;
   std::unique_ptr<mesh> mesh;
   std::unique_ptr<light> light;
   std::unique_ptr<camera> camera;
+  std::string name;
   friend entity_store;
 };
 class entity_store {
@@ -98,6 +99,7 @@ private:
 class world {
 public:
   entity_store &get_entity_store();
+  void init();
   void update();
   void render();
 

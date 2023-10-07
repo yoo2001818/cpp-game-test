@@ -17,17 +17,24 @@ public:
 };
 class geometry {
 public:
-  unsigned int mVbo;
-  unsigned int mVao;
+  unsigned int mVbo = -1;
+  unsigned int mEbo = -1;
+  unsigned int mVao = -1;
   std::vector<glm::vec3> mPositions;
   std::vector<glm::vec2> mTexCoords;
   std::vector<glm::vec3> mNormals;
   std::vector<glm::vec3> mTangents;
-  std::vector<int> mIndices;
+  std::vector<unsigned int> mIndices;
   // aabb mBounds;
-  // int mPolyCount;
+  int mSize;
   int mType;
   // float mLodThreshold;
+
+  void render();
+  void dispose();
+
+private:
+  void prepare();
 };
 geometry make_box();
 
