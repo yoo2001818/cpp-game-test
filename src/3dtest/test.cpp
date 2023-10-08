@@ -174,6 +174,13 @@ void world::render() {
   for (auto it = entity_store.begin(); it != entity_store.end(); it++) {
     auto &entity = *it;
     if (entity.mesh != nullptr && entity.transform != nullptr) {
+      for (int i = 0; i < entity.mesh->geometries.size(); i++) {
+        auto &material = entity.mesh->materials[i];
+        auto &geometry = entity.mesh->geometries[i];
+        material->prepare();
+        // TODO: Pass uniforms
+        geometry->render();
+      }
     }
   }
 }
