@@ -19,6 +19,8 @@ public:
   glm::mat4 &getMatrix();
   glm::mat4 getInverseMatrix();
 
+  transform() : mMatrix(1.0){};
+
 private:
   glm::mat4 mMatrix;
 };
@@ -66,10 +68,10 @@ public:
 
   // NOTE: We use shared pointers here since we don't know actual types here,
   // and we don't know how it will go
-  std::unique_ptr<transform> transform;
-  std::unique_ptr<mesh> mesh;
-  std::unique_ptr<light> light;
-  std::unique_ptr<camera> camera;
+  std::unique_ptr<::transform> transform;
+  std::unique_ptr<::mesh> mesh;
+  std::unique_ptr<::light> light;
+  std::unique_ptr<::camera> camera;
   std::string name;
   friend entity_store;
 };
@@ -98,7 +100,7 @@ public:
 private:
   std::vector<entity> mEntityList;
   std::stack<entity_id> mDeadEntities;
-  int mMaxEntityId;
+  int mMaxEntityId = 0;
 };
 class world {
 public:

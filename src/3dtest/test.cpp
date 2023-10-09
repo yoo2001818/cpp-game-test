@@ -5,8 +5,10 @@
 #include <glm/ext/matrix_clip_space.hpp>
 #include <glm/ext/matrix_transform.hpp>
 #include <glm/ext/vector_float3.hpp>
+#include <glm/gtc/type_ptr.hpp>
 #include <glm/gtx/transform.hpp>
 #include <glm/matrix.hpp>
+#include <iostream>
 #include <memory>
 #include <numbers>
 
@@ -14,17 +16,21 @@ void transform::translate(glm::vec3 pPosition) {
   this->mMatrix = glm::translate(this->mMatrix, pPosition);
 }
 void transform::rotateX(float pAngle) {
-  glm::rotate(this->mMatrix, pAngle, glm::vec3(1.0f, 0.0f, 0.0f));
+  this->mMatrix =
+      glm::rotate(this->mMatrix, pAngle, glm::vec3(1.0f, 0.0f, 0.0f));
 }
 void transform::rotateY(float pAngle) {
-  glm::rotate(this->mMatrix, pAngle, glm::vec3(0.0f, 1.0f, 0.0f));
+  this->mMatrix =
+      glm::rotate(this->mMatrix, pAngle, glm::vec3(0.0f, 1.0f, 0.0f));
 }
 void transform::rotateZ(float pAngle) {
-  glm::rotate(this->mMatrix, pAngle, glm::vec3(0.0f, 0.0f, 1.0f));
+  this->mMatrix =
+      glm::rotate(this->mMatrix, pAngle, glm::vec3(0.0f, 0.0f, 1.0f));
 }
 void transform::lookAt(glm::vec3 pTarget) {
   glm::vec4 eyePos = this->mMatrix * glm::vec4(0.0f, 0.0f, 0.0f, 1.0f);
-  glm::lookAt(glm::vec3(eyePos), pTarget, glm::vec3(0.0, 1.0, 0.0));
+  this->mMatrix =
+      glm::lookAt(glm::vec3(eyePos), pTarget, glm::vec3(0.0, 1.0, 0.0));
 }
 void transform::reset() { this->mMatrix = glm::mat4(1.0); }
 
@@ -35,11 +41,33 @@ void material::prepare() {
   if (this->mProgramId == -1) {
     auto vs = glCreateShader(GL_VERTEX_SHADER);
     // FIXME
-    glShaderSource(vs, 1, nullptr, NULL);
+    const char *vsSource = "#version 330 core\n"
+                           "layout (location = 0) in vec3 aPosition;\n"
+                           "layout (location = 1) in vec2 aTexCoord;\n"
+                           "layout (location = 2) in vec3 aNormal;\n"
+                           "layout (location = 3) in vec3 aTangent;\n"
+                           "out vec3 vColor;\n"
+                           "uniform mat4 uModel;\n"
+                           "uniform mat4 uView;\n"
+                           "uniform mat4 uProjection;\n"
+                           "void main()\n"
+                           "{\n"
+                           "   gl_Position = uProjection * uView * uModel * "
+                           "vec4(aPosition, 1.0);\n"
+                           "   vColor = aNormal * 0.5 + 0.5;\n"
+                           "}\0";
+    glShaderSource(vs, 1, &vsSource, NULL);
     glCompileShader(vs);
 
     auto fs = glCreateShader(GL_FRAGMENT_SHADER);
-    glShaderSource(fs, 1, nullptr, NULL);
+    const char *fsSource = "#version 330 core\n"
+                           "in vec3 vColor;\n"
+                           "out vec4 FragColor;\n"
+                           "void main()\n"
+                           "{\n"
+                           "    FragColor = vec4(vColor, 1.0f);\n"
+                           "}\0";
+    glShaderSource(fs, 1, &fsSource, NULL);
     glCompileShader(fs);
 
     this->mProgramId = glCreateProgram();
@@ -128,23 +156,24 @@ void world::init() {
   {
     auto &cube = entity_store.create_entity();
     cube.name = "cube";
-    cube.transform = {};
-    cube.transform->translate(glm::vec3(0.0, 0.0, 0.0));
-    cube.mesh = {};
+    cube.transform = std::make_unique<transform>();
+    // cube.transform->translate(glm::vec3(0.0, 0.0, 0.0));
+    cube.mesh = std::make_unique<mesh>();
     cube.mesh->geometries.push_back(std::make_shared<geometry>(make_box()));
     cube.mesh->materials.push_back(std::make_shared<material>());
   }
   {
     auto &camera = entity_store.create_entity();
     camera.name = "camera";
-    camera.transform = {};
+    camera.transform = std::make_unique<transform>();
     camera.transform->translate(glm::vec3(0.0, 5.0, 5.0));
-    camera.transform->lookAt(glm::vec3(0.0));
-    camera.camera = {};
+    camera.transform->rotateX(glm::radians(-45.0));
+    // camera.transform->lookAt(glm::vec3(0.0));
+    camera.camera = std::make_unique<::camera>();
     camera.camera->type = camera::PERSPECTIVE;
     camera.camera->near = 0.1f;
     camera.camera->far = 100.0f;
-    camera.camera->fov = std::numbers::pi * 90.0f;
+    camera.camera->fov = glm::radians(70.0f);
   }
 }
 
@@ -153,7 +182,7 @@ void world::update() {
   for (auto it = entity_store.begin(); it != entity_store.end(); it++) {
     auto &entity = *it;
     if (entity.name == "cube") {
-      entity.transform->rotateY(0.1f);
+      entity.transform->rotateY(glm::radians(5.0f));
     }
   }
 }
@@ -178,7 +207,15 @@ void world::render() {
         auto &material = entity.mesh->materials[i];
         auto &geometry = entity.mesh->geometries[i];
         material->prepare();
-        // TODO: Pass uniforms
+        glUniformMatrix4fv(glGetUniformLocation(material->mProgramId, "uModel"),
+                           1, false,
+                           glm::value_ptr(entity.transform->getMatrix()));
+        glUniformMatrix4fv(
+            glGetUniformLocation(material->mProgramId, "uView"), 1, false,
+            glm::value_ptr(camera->transform->getInverseMatrix()));
+        glUniformMatrix4fv(
+            glGetUniformLocation(material->mProgramId, "uProjection"), 1, false,
+            glm::value_ptr(camera->camera->getProjection(1024.0f / 768.0f)));
         geometry->render();
       }
     }
