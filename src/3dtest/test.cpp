@@ -41,21 +41,22 @@ void material::prepare() {
   if (this->mProgramId == -1) {
     auto vs = glCreateShader(GL_VERTEX_SHADER);
     // FIXME
-    const char *vsSource = "#version 330 core\n"
-                           "layout (location = 0) in vec3 aPosition;\n"
-                           "layout (location = 1) in vec2 aTexCoord;\n"
-                           "layout (location = 2) in vec3 aNormal;\n"
-                           "layout (location = 3) in vec3 aTangent;\n"
-                           "out vec3 vColor;\n"
-                           "uniform mat4 uModel;\n"
-                           "uniform mat4 uView;\n"
-                           "uniform mat4 uProjection;\n"
-                           "void main()\n"
-                           "{\n"
-                           "   gl_Position = uProjection * uView * uModel * "
-                           "vec4(aPosition, 1.0);\n"
-                           "   vColor = aNormal * 0.5 + 0.5;\n"
-                           "}\0";
+    const char *vsSource =
+        "#version 330 core\n"
+        "layout (location = 0) in vec3 aPosition;\n"
+        "layout (location = 1) in vec2 aTexCoord;\n"
+        "layout (location = 2) in vec3 aNormal;\n"
+        "layout (location = 3) in vec3 aTangent;\n"
+        "out vec3 vColor;\n"
+        "uniform mat4 uModel;\n"
+        "uniform mat4 uView;\n"
+        "uniform mat4 uProjection;\n"
+        "void main()\n"
+        "{\n"
+        "   gl_Position = uProjection * uView * uModel * "
+        "vec4(aPosition, 1.0);\n"
+        "   vColor = (uView * uModel * vec4(aNormal, 0.0)).xyz * 0.5 + 0.5;\n"
+        "}\0";
     glShaderSource(vs, 1, &vsSource, NULL);
     glCompileShader(vs);
 
@@ -173,7 +174,7 @@ void world::init() {
     camera.camera->type = camera::PERSPECTIVE;
     camera.camera->near = 0.1f;
     camera.camera->far = 100.0f;
-    camera.camera->fov = glm::radians(70.0f);
+    camera.camera->fov = glm::radians(40.0f);
   }
 }
 
@@ -182,7 +183,7 @@ void world::update() {
   for (auto it = entity_store.begin(); it != entity_store.end(); it++) {
     auto &entity = *it;
     if (entity.name == "cube") {
-      entity.transform->rotateY(glm::radians(5.0f));
+      entity.transform->rotateY(glm::radians(2.0f));
     }
   }
 }
