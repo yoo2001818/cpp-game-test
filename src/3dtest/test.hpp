@@ -108,9 +108,12 @@ public:
   void init();
   void update();
   void render();
+  void resize(int pWidth, int pHeight);
 
 private:
   entity_store mEntityStore;
+  int mWidth;
+  int mHeight;
 };
 class renderer {};
 

@@ -22,9 +22,9 @@ int main() {
 
   SDL_Window *window;
 
-  window =
-      SDL_CreateWindow("CppGameTest", SDL_WINDOWPOS_CENTERED,
-                       SDL_WINDOWPOS_CENTERED, 1024, 768, SDL_WINDOW_OPENGL);
+  window = SDL_CreateWindow("CppGameTest", SDL_WINDOWPOS_CENTERED,
+                            SDL_WINDOWPOS_CENTERED, 1024, 768,
+                            SDL_WINDOW_OPENGL | SDL_WINDOW_RESIZABLE);
 
   if (window == nullptr) {
     SDL_Log("Unable to create window: %s", SDL_GetError());
@@ -38,6 +38,7 @@ int main() {
   }
 
   world mWorld;
+  mWorld.resize(1024, 768);
   mWorld.init();
 
   {
@@ -47,12 +48,15 @@ int main() {
         if (event.type == SDL_QUIT) {
           break;
         }
+        if (event.type == SDL_WINDOWEVENT &&
+            event.window.event == SDL_WINDOWEVENT_RESIZED) {
+          mWorld.resize(event.window.data1, event.window.data2);
+        }
       }
 
       uint64_t beginTime = SDL_GetTicks64();
 
       // Update
-      glViewport(0, 0, 1024, 768);
       glClearColor(0.0f, 0.0f, 0.0f, 0.0f);
       glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
       glEnable(GL_DEPTH_TEST);

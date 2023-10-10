@@ -216,9 +216,16 @@ void world::render() {
             glm::value_ptr(camera->transform->getInverseMatrix()));
         glUniformMatrix4fv(
             glGetUniformLocation(material->mProgramId, "uProjection"), 1, false,
-            glm::value_ptr(camera->camera->getProjection(1024.0f / 768.0f)));
+            glm::value_ptr(camera->camera->getProjection((float)this->mWidth /
+                                                         this->mHeight)));
         geometry->render();
       }
     }
   }
+}
+
+void world::resize(int pWidth, int pHeight) {
+  this->mWidth = pWidth;
+  this->mHeight = pHeight;
+  glViewport(0, 0, this->mWidth, this->mHeight);
 }
