@@ -5,6 +5,7 @@
 #include <glm/ext/matrix_clip_space.hpp>
 #include <glm/ext/matrix_transform.hpp>
 #include <glm/ext/vector_float3.hpp>
+#include <glm/gtc/random.hpp>
 #include <glm/gtc/type_ptr.hpp>
 #include <glm/gtx/transform.hpp>
 #include <glm/matrix.hpp>
@@ -41,22 +42,22 @@ void material::prepare() {
   if (this->mProgramId == -1) {
     auto vs = glCreateShader(GL_VERTEX_SHADER);
     // FIXME
-    const char *vsSource =
-        "#version 330 core\n"
-        "layout (location = 0) in vec3 aPosition;\n"
-        "layout (location = 1) in vec2 aTexCoord;\n"
-        "layout (location = 2) in vec3 aNormal;\n"
-        "layout (location = 3) in vec3 aTangent;\n"
-        "out vec3 vColor;\n"
-        "uniform mat4 uModel;\n"
-        "uniform mat4 uView;\n"
-        "uniform mat4 uProjection;\n"
-        "void main()\n"
-        "{\n"
-        "   gl_Position = uProjection * uView * uModel * "
-        "vec4(aPosition, 1.0);\n"
-        "   vColor = (uView * uModel * vec4(aNormal, 0.0)).xyz * 0.5 + 0.5;\n"
-        "}\0";
+    const char *vsSource = "#version 330 core\n"
+                           "layout (location = 0) in vec3 aPosition;\n"
+                           "layout (location = 1) in vec2 aTexCoord;\n"
+                           "layout (location = 2) in vec3 aNormal;\n"
+                           "layout (location = 3) in vec3 aTangent;\n"
+                           "out vec3 vColor;\n"
+                           "uniform mat4 uModel;\n"
+                           "uniform mat4 uView;\n"
+                           "uniform mat4 uProjection;\n"
+                           "void main()\n"
+                           "{\n"
+                           "   gl_Position = uProjection * uView * uModel * "
+                           "vec4(aPosition, 1.0);\n"
+                           "   vColor = normalize((uView * uModel * "
+                           "vec4(aNormal, 0.0)).xyz) * 0.5 + 0.5;\n"
+                           "}\0";
     glShaderSource(vs, 1, &vsSource, NULL);
     glCompileShader(vs);
 
@@ -154,11 +155,15 @@ entity_store &world::get_entity_store() { return this->mEntityStore; }
 
 void world::init() {
   auto &entity_store = this->get_entity_store();
-  {
+  for (int i = 0; i < 10; i += 1) {
     auto &cube = entity_store.create_entity();
     cube.name = "cube";
     cube.transform = std::make_unique<transform>();
-    // cube.transform->translate(glm::vec3(0.0, 0.0, 0.0));
+    cube.transform->translate(glm::vec3(glm::linearRand(-2.0f, 2.0f),
+                                        glm::linearRand(-2.0f, 2.0f),
+                                        glm::linearRand(-2.0f, 2.0f)));
+    cube.transform->getMatrix() =
+        glm::scale(cube.transform->getMatrix(), glm::vec3(0.2));
     cube.mesh = std::make_unique<mesh>();
     cube.mesh->geometries.push_back(std::make_shared<geometry>(make_box()));
     cube.mesh->materials.push_back(std::make_shared<material>());
