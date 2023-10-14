@@ -114,6 +114,7 @@ private:
   entity_store mEntityStore;
   int mWidth;
   int mHeight;
+  float mAngle;
 };
 class renderer {};
 

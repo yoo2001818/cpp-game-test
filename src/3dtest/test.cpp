@@ -1,6 +1,7 @@
 #include "test.hpp"
 #include "3dtest/geometry.hpp"
 #include <GL/glew.h>
+#include <cmath>
 #include <functional>
 #include <glm/ext/matrix_clip_space.hpp>
 #include <glm/ext/matrix_transform.hpp>
@@ -10,6 +11,7 @@
 #include <glm/gtx/string_cast.hpp>
 #include <glm/gtx/transform.hpp>
 #include <glm/matrix.hpp>
+#include <glm/trigonometric.hpp>
 #include <iostream>
 #include <memory>
 #include <numbers>
@@ -30,10 +32,10 @@ void transform::rotateZ(float pAngle) {
       glm::rotate(this->mMatrix, pAngle, glm::vec3(0.0f, 0.0f, 1.0f));
 }
 void transform::lookAt(glm::vec3 pTarget) {
-  glm::vec4 eyePos = this->mMatrix * glm::vec4(0.0f, 0.0f, 0.0f, 1.0f);
+  glm::vec3 eyePos =
+      glm::vec3(this->mMatrix * glm::vec4(0.0f, 0.0f, 0.0f, 1.0f));
   this->mMatrix =
-      glm::lookAt(glm::vec3(eyePos), pTarget, glm::vec3(0.0f, 1.0f, 0.0f));
-  std::cout << glm::to_string(this->mMatrix) << std::endl;
+      glm::inverse(glm::lookAt(eyePos, pTarget, glm::vec3(0.0f, 1.0f, 0.0f)));
 }
 void transform::reset() { this->mMatrix = glm::mat4(1.0); }
 
@@ -156,6 +158,7 @@ std::vector<entity>::iterator entity_store::end() {
 entity_store &world::get_entity_store() { return this->mEntityStore; }
 
 void world::init() {
+  this->mAngle = 0.0;
   auto &entity_store = this->get_entity_store();
   for (int i = 0; i < 10; i += 1) {
     auto &cube = entity_store.create_entity();
@@ -175,7 +178,6 @@ void world::init() {
     camera.name = "camera";
     camera.transform = std::make_unique<transform>();
     camera.transform->translate(glm::vec3(0.0, 5.0, 5.0));
-    camera.transform->rotateX(glm::radians(-45.0));
     camera.transform->lookAt(glm::vec3(0.0));
     camera.camera = std::make_unique<::camera>();
     camera.camera->type = camera::PERSPECTIVE;
@@ -187,10 +189,17 @@ void world::init() {
 
 void world::update() {
   auto &entity_store = this->get_entity_store();
+  this->mAngle += glm::radians(2.0);
   for (auto it = entity_store.begin(); it != entity_store.end(); it++) {
     auto &entity = *it;
     if (entity.name == "cube") {
       entity.transform->rotateY(glm::radians(2.0f));
+    }
+    if (entity.name == "camera") {
+      entity.transform->getMatrix() = glm::mat4(1.0);
+      entity.transform->translate(glm::vec3(std::cos(this->mAngle) * 5.0, 0.0,
+                                            std::sin(this->mAngle) * 5.0));
+      entity.transform->lookAt(glm::vec3(0.0));
     }
   }
 }
