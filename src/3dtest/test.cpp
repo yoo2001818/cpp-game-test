@@ -7,6 +7,7 @@
 #include <glm/ext/vector_float3.hpp>
 #include <glm/gtc/random.hpp>
 #include <glm/gtc/type_ptr.hpp>
+#include <glm/gtx/string_cast.hpp>
 #include <glm/gtx/transform.hpp>
 #include <glm/matrix.hpp>
 #include <iostream>
@@ -31,7 +32,8 @@ void transform::rotateZ(float pAngle) {
 void transform::lookAt(glm::vec3 pTarget) {
   glm::vec4 eyePos = this->mMatrix * glm::vec4(0.0f, 0.0f, 0.0f, 1.0f);
   this->mMatrix =
-      glm::lookAt(glm::vec3(eyePos), pTarget, glm::vec3(0.0, 1.0, 0.0));
+      glm::lookAt(glm::vec3(eyePos), pTarget, glm::vec3(0.0f, 1.0f, 0.0f));
+  std::cout << glm::to_string(this->mMatrix) << std::endl;
 }
 void transform::reset() { this->mMatrix = glm::mat4(1.0); }
 
@@ -174,7 +176,7 @@ void world::init() {
     camera.transform = std::make_unique<transform>();
     camera.transform->translate(glm::vec3(0.0, 5.0, 5.0));
     camera.transform->rotateX(glm::radians(-45.0));
-    // camera.transform->lookAt(glm::vec3(0.0));
+    camera.transform->lookAt(glm::vec3(0.0));
     camera.camera = std::make_unique<::camera>();
     camera.camera->type = camera::PERSPECTIVE;
     camera.camera->near = 0.1f;
