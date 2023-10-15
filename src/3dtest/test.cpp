@@ -159,6 +159,7 @@ entity_store &world::get_entity_store() { return this->mEntityStore; }
 
 void world::init() {
   this->mAngle = 0.0;
+  this->mAngleY = 0.0;
   auto &entity_store = this->get_entity_store();
   for (int i = 0; i < 10; i += 1) {
     auto &cube = entity_store.create_entity();
@@ -189,7 +190,7 @@ void world::init() {
 
 void world::update() {
   auto &entity_store = this->get_entity_store();
-  this->mAngle += glm::radians(2.0);
+  // this->mAngle += glm::radians(2.0);
   for (auto it = entity_store.begin(); it != entity_store.end(); it++) {
     auto &entity = *it;
     if (entity.name == "cube") {
@@ -197,11 +198,19 @@ void world::update() {
     }
     if (entity.name == "camera") {
       entity.transform->getMatrix() = glm::mat4(1.0);
-      entity.transform->translate(glm::vec3(std::cos(this->mAngle) * 5.0, 0.0,
-                                            std::sin(this->mAngle) * 5.0));
+
+      entity.transform->translate(
+          glm::vec3(std::cos(this->mAngle) * std::cos(this->mAngleY) * 5.0,
+                    std::sin(this->mAngleY) * 5.0,
+                    std::sin(this->mAngle) * std::cos(this->mAngleY) * 5.0));
       entity.transform->lookAt(glm::vec3(0.0));
     }
   }
+}
+
+void world::mouse_move(int x, int y) {
+  this->mAngle = x / 200.0;
+  this->mAngleY = y / 200.0;
 }
 
 void world::render() {

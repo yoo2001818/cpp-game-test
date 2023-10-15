@@ -109,12 +109,14 @@ public:
   void update();
   void render();
   void resize(int pWidth, int pHeight);
+  void mouse_move(int x, int y);
 
 private:
   entity_store mEntityStore;
   int mWidth;
   int mHeight;
   float mAngle;
+  float mAngleY;
 };
 class renderer {};
 

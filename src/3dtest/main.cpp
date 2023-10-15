@@ -44,15 +44,22 @@ int main() {
   {
     while (true) {
       SDL_Event event;
-      if (SDL_PollEvent(&event)) {
+      bool exit = false;
+      while (SDL_PollEvent(&event)) {
         if (event.type == SDL_QUIT) {
+          exit = true;
           break;
         }
         if (event.type == SDL_WINDOWEVENT &&
             event.window.event == SDL_WINDOWEVENT_RESIZED) {
           mWorld.resize(event.window.data1, event.window.data2);
         }
+        if (event.type == SDL_MOUSEMOTION) {
+          mWorld.mouse_move(event.motion.x, event.motion.y);
+        }
       }
+      if (exit)
+        break;
 
       uint64_t beginTime = SDL_GetTicks64();
 
