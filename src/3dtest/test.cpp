@@ -209,8 +209,9 @@ void world::update() {
 }
 
 void world::mouse_move(int x, int y) {
-  this->mAngle = x / 200.0;
-  this->mAngleY = y / 200.0;
+  this->mAngle = (float)x / this->mWidth * std::numbers::pi * 2.0;
+  this->mAngleY =
+      (float)-y / this->mHeight * std::numbers::pi + std::numbers::pi / 2.0;
 }
 
 void world::render() {
