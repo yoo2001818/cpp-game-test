@@ -190,7 +190,6 @@ void world::init() {
 
 void world::update() {
   auto &entity_store = this->get_entity_store();
-  // this->mAngle += glm::radians(2.0);
   for (auto it = entity_store.begin(); it != entity_store.end(); it++) {
     auto &entity = *it;
     if (entity.name == "cube") {
