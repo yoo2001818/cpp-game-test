@@ -37,5 +37,6 @@ private:
   void prepare();
 };
 geometry make_box();
+geometry load_obj(std::string pFilename);
 
 #endif // __GEOMETRY_HPP__

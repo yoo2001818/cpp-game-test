@@ -86,6 +86,8 @@ geometry make_box() {
   };
 }
 
+geometry load_obj(std::string pFilename) {}
+
 void geometry::prepare() {
   if (this->mVbo == -1) {
     glGenBuffers(1, &(this->mVbo));
