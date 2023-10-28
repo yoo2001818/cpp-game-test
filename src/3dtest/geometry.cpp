@@ -1,6 +1,8 @@
 #include "geometry.hpp"
 #include <GL/glew.h>
+#include <fstream>
 #include <iostream>
+#include <string>
 
 geometry make_box() {
   return {
@@ -86,7 +88,13 @@ geometry make_box() {
   };
 }
 
-geometry load_obj(std::string pFilename) {}
+geometry load_obj(std::string pFilename) {
+  std::ifstream infile(pFilename);
+  std::string line;
+  while (std::getline(infile, line)) {
+    // Process each line
+  }
+}
 
 void geometry::prepare() {
   if (this->mVbo == -1) {
