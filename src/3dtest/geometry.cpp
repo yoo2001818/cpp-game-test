@@ -150,6 +150,8 @@ geometry load_obj(std::string pFilename) {
             parseInt(normal, 10) - 1,
             parseInt(tex, 10) - 1,
           ];
+        // Instead of making ChannelGeometry here, I could just append
+        // individual face's verticies to the buffer
         });
         builder.addFace(points);
         break;
