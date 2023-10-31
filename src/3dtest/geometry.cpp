@@ -88,11 +88,44 @@ geometry make_box() {
   };
 }
 
+std::vector<std::string> string_split(std::string s, std::string delimiter) {
+  size_t pos_start = 0, pos_end, delim_len = delimiter.length();
+  std::string token;
+  std::vector<std::string> res;
+
+  while ((pos_end = s.find(delimiter, pos_start)) != std::string::npos) {
+    token = s.substr(pos_start, pos_end - pos_start);
+    pos_start = pos_end + delim_len;
+    res.push_back(token);
+  }
+
+  res.push_back(s.substr(pos_start));
+  return res;
+}
+
 geometry load_obj(std::string pFilename) {
   std::ifstream infile(pFilename);
   std::string line;
   while (std::getline(infile, line)) {
     // Process each line
+    if (line[0] == '#') {
+      break;
+    }
+    std::vector<std::string> words = string_split(line, " ");
+    // o -> Object
+    // v -> aPosition
+    // vt -> aTexCoord
+    // vn -> aNormal
+    // vp -> Not sure
+    // f -> Indices
+    // mtllib
+    // usemtl
+    // s off -> Normal smoothing
+    if (words[0] == "v") {
+
+    } else if (words[0] == "vn") {
+      // ...
+    }
     /*
   const builder = new GeometryBuilder();
   builder.clearAttributes(['aPosition', 'aNormal', 'aTexCoord'], [3, 3, 2]);
