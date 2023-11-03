@@ -125,6 +125,21 @@ geometry load_obj(std::string pFilename) {
 
     } else if (words[0] == "vn") {
       // ...
+    } else if (words[0] == "vt") {
+
+    } else if (words[0] == "p") {
+
+    } else if (words[0] == "l") {
+
+    } else if (words[0] == "f") {
+
+    } else if (words[0] == "o") {
+
+    } else if (words[0] == "usemtl") {
+
+    } else if (words[0] == "g") {
+
+    } else if (words[0] == "s") {
     }
     /*
   const builder = new GeometryBuilder();
