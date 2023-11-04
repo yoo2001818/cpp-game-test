@@ -122,24 +122,26 @@ geometry load_obj(std::string pFilename) {
     // usemtl
     // s off -> Normal smoothing
     if (words[0] == "v") {
-
+      // Vertex coords: v 0 0 0
     } else if (words[0] == "vn") {
-      // ...
+      // Normals: vn 0 0 0
     } else if (words[0] == "vt") {
-
+      // TexCoords: vt 0 0
     } else if (words[0] == "p") {
-
+      // Point
     } else if (words[0] == "l") {
-
+      // Line
     } else if (words[0] == "f") {
-
+      // Face: f 0/0/0 0/0/0 0/0/0
+      // Arbitrary amount of points are possible; we must triangluate them
     } else if (words[0] == "o") {
-
+      // Finalize object if exists; otherwise specify its name
     } else if (words[0] == "usemtl") {
-
+      // mtl file directory path; but we won't do anything for now
     } else if (words[0] == "g") {
-
+      // Put the object in group if exists
     } else if (words[0] == "s") {
+      // Smoothing: s off / s 0 / s on / s 1
     }
     /*
   const builder = new GeometryBuilder();
