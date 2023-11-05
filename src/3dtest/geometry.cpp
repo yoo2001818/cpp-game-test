@@ -3,6 +3,7 @@
 #include <fstream>
 #include <iostream>
 #include <string>
+#include <vector>
 
 geometry make_box() {
   return {
@@ -106,6 +107,13 @@ std::vector<std::string> string_split(std::string s, std::string delimiter) {
 geometry load_obj(std::string pFilename) {
   std::ifstream infile(pFilename);
   std::string line;
+  std::vector<glm::vec3> vertPos;
+  std::vector<glm::vec3> vertNormals;
+  std::vector<glm::vec2> vertTexCoords;
+  std::vector<glm::vec3> facePos;
+  std::vector<glm::vec3> faceNormals;
+  std::vector<glm::vec2> faceTexCoords;
+  std::vector<unsigned int> faces;
   while (std::getline(infile, line)) {
     // Process each line
     if (line[0] == '#') {
@@ -123,6 +131,7 @@ geometry load_obj(std::string pFilename) {
     // s off -> Normal smoothing
     if (words[0] == "v") {
       // Vertex coords: v 0 0 0
+      //
     } else if (words[0] == "vn") {
       // Normals: vn 0 0 0
     } else if (words[0] == "vt") {
