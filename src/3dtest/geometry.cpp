@@ -131,11 +131,15 @@ geometry load_obj(std::string pFilename) {
     // s off -> Normal smoothing
     if (words[0] == "v") {
       // Vertex coords: v 0 0 0
-      //
+      vertPos.push_back(
+          {std::stof(words[1]), std::stof(words[2]), std::stof((words[3]))});
     } else if (words[0] == "vn") {
       // Normals: vn 0 0 0
+      vertNormals.push_back(
+          {std::stof(words[1]), std::stof(words[2]), std::stof((words[3]))});
     } else if (words[0] == "vt") {
       // TexCoords: vt 0 0
+      vertTexCoords.push_back({std::stof(words[1]), std::stof(words[2])});
     } else if (words[0] == "p") {
       // Point
     } else if (words[0] == "l") {
