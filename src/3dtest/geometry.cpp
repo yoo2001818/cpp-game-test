@@ -147,6 +147,9 @@ geometry load_obj(std::string pFilename) {
     } else if (words[0] == "f") {
       // Face: f 0/0/0 0/0/0 0/0/0
       // Arbitrary amount of points are possible; we must triangluate them
+      for (int i = 1; i < words.size(); i += 1) {
+        std::vector<std::string> segments = string_split(words[i], "/");
+      }
     } else if (words[0] == "o") {
       // Finalize object if exists; otherwise specify its name
     } else if (words[0] == "usemtl") {
