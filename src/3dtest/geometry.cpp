@@ -149,6 +149,9 @@ geometry load_obj(std::string pFilename) {
       // Arbitrary amount of points are possible; we must triangluate them
       for (int i = 1; i < words.size(); i += 1) {
         std::vector<std::string> segments = string_split(words[i], "/");
+        facePos.push_back(vertPos[std::stoi(segments[0])]);
+        faceNormals.push_back(vertNormals[std::stoi(segments[1])]);
+        faceTexCoords.push_back(vertTexCoords[std::stoi(segments[2])]);
       }
     } else if (words[0] == "o") {
       // Finalize object if exists; otherwise specify its name
