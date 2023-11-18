@@ -147,11 +147,17 @@ geometry load_obj(std::string pFilename) {
     } else if (words[0] == "f") {
       // Face: f 0/0/0 0/0/0 0/0/0
       // Arbitrary amount of points are possible; we must triangluate them
+      int startIndex = facePos.size();
       for (int i = 1; i < words.size(); i += 1) {
         std::vector<std::string> segments = string_split(words[i], "/");
         facePos.push_back(vertPos[std::stoi(segments[0])]);
         faceNormals.push_back(vertNormals[std::stoi(segments[1])]);
         faceTexCoords.push_back(vertTexCoords[std::stoi(segments[2])]);
+      }
+      for (int i = 3; i < words.size(); i += 1) {
+        faces.push_back(startIndex);
+        faces.push_back(startIndex + 1);
+        faces.push_back(startIndex + i - 1);
       }
     } else if (words[0] == "o") {
       // Finalize object if exists; otherwise specify its name
