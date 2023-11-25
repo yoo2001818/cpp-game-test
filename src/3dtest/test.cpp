@@ -171,7 +171,8 @@ void world::init() {
     cube.transform->getMatrix() =
         glm::scale(cube.transform->getMatrix(), glm::vec3(0.2));
     cube.mesh = std::make_unique<mesh>();
-    cube.mesh->geometries.push_back(std::make_shared<geometry>(make_box()));
+    cube.mesh->geometries.push_back(
+        std::make_shared<geometry>(load_obj("res/teapot2.obj")));
     cube.mesh->materials.push_back(std::make_shared<material>());
   }
   {
