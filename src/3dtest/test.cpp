@@ -161,6 +161,7 @@ void world::init() {
   this->mAngle = 0.0;
   this->mAngleY = 0.0;
   auto &entity_store = this->get_entity_store();
+  auto teapot = std::make_shared<geometry>(load_obj("res/teapot2.obj"));
   for (int i = 0; i < 10; i += 1) {
     auto &cube = entity_store.create_entity();
     cube.name = "cube";
@@ -171,8 +172,7 @@ void world::init() {
     cube.transform->getMatrix() =
         glm::scale(cube.transform->getMatrix(), glm::vec3(0.2));
     cube.mesh = std::make_unique<mesh>();
-    cube.mesh->geometries.push_back(
-        std::make_shared<geometry>(load_obj("res/teapot2.obj")));
+    cube.mesh->geometries.push_back(teapot);
     cube.mesh->materials.push_back(std::make_shared<material>());
   }
   {

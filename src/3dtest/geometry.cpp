@@ -117,9 +117,10 @@ geometry load_obj(std::string pFilename) {
   while (std::getline(infile, line)) {
     // Process each line
     if (line[0] == '#') {
-      break;
+      continue;
     }
     std::vector<std::string> words = string_split(line, " ");
+    std::cout << line << std::endl;
     // o -> Object
     // v -> aPosition
     // vt -> aTexCoord
@@ -151,10 +152,14 @@ geometry load_obj(std::string pFilename) {
       for (int i = 1; i < words.size(); i += 1) {
         std::vector<std::string> segments = string_split(words[i], "/");
         facePos.push_back(vertPos[std::stoi(segments[0])]);
-        faceNormals.push_back(vertNormals[std::stoi(segments[1])]);
-        faceTexCoords.push_back(vertTexCoords[std::stoi(segments[2])]);
+        if (segments[1].size() > 0) {
+          faceTexCoords.push_back(vertTexCoords[std::stoi(segments[1])]);
+        } else {
+          faceTexCoords.push_back({});
+        }
+        faceNormals.push_back(vertNormals[std::stoi(segments[2])]);
       }
-      for (int i = 3; i < words.size(); i += 1) {
+      for (int i = 3; i <= words.size(); i += 1) {
         faces.push_back(startIndex);
         faces.push_back(startIndex + 1);
         faces.push_back(startIndex + i - 1);
@@ -169,11 +174,13 @@ geometry load_obj(std::string pFilename) {
       // Smoothing: s off / s 0 / s on / s 1
     }
   }
+  std::cout << "Geometry" << faces.size() << std::endl;
   geometry geom;
   geom.mIndices = faces;
   geom.mPositions = facePos;
   geom.mNormals = faceNormals;
   geom.mTexCoords = faceTexCoords;
+  geom.mType = GL_TRIANGLES;
   return geom;
 }
 
