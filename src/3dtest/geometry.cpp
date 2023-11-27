@@ -149,20 +149,23 @@ geometry load_obj(std::string pFilename) {
       // Face: f 0/0/0 0/0/0 0/0/0
       // Arbitrary amount of points are possible; we must triangluate them
       int startIndex = facePos.size();
+      std::cout << words.size() << std::endl;
       for (int i = 1; i < words.size(); i += 1) {
         std::vector<std::string> segments = string_split(words[i], "/");
-        facePos.push_back(vertPos[std::stoi(segments[0])]);
+        facePos.push_back(vertPos[std::stoi(segments[0]) - 1]);
         if (segments[1].size() > 0) {
-          faceTexCoords.push_back(vertTexCoords[std::stoi(segments[1])]);
+          faceTexCoords.push_back(vertTexCoords[std::stoi(segments[1]) - 1]);
         } else {
           faceTexCoords.push_back({});
         }
-        faceNormals.push_back(vertNormals[std::stoi(segments[2])]);
+        faceNormals.push_back(vertNormals[std::stoi(segments[2]) - 1]);
       }
-      for (int i = 3; i <= words.size(); i += 1) {
+      for (int i = 3; i <= words.size() - 1; i += 1) {
         faces.push_back(startIndex);
-        faces.push_back(startIndex + 1);
+        faces.push_back(startIndex + i - 2);
         faces.push_back(startIndex + i - 1);
+        std::cout << (startIndex) << "," << (startIndex + 1) << ","
+                  << (startIndex + i - 1) << std::endl;
       }
     } else if (words[0] == "o") {
       // Finalize object if exists; otherwise specify its name
