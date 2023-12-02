@@ -23,7 +23,7 @@ public:
   std::vector<glm::vec3> mPositions;
   std::vector<glm::vec2> mTexCoords;
   std::vector<glm::vec3> mNormals;
-  std::vector<glm::vec3> mTangents;
+  std::vector<glm::vec4> mTangents;
   std::vector<unsigned int> mIndices;
   // aabb mBounds;
   int mSize;
@@ -38,5 +38,7 @@ private:
 };
 geometry make_box();
 geometry load_obj(std::string pFilename);
+void calc_normals(geometry &pGeometry);
+void calc_tangents(geometry &pGeometry);
 
 #endif // __GEOMETRY_HPP__
