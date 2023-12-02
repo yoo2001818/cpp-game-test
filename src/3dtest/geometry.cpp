@@ -117,6 +117,7 @@ geometry load_obj(std::string pFilename) {
   std::vector<glm::vec3> faceNormals;
   std::vector<glm::vec2> faceTexCoords;
   std::vector<unsigned int> faces;
+  bool hasNormals = false;
   while (std::getline(infile, line)) {
     // Process each line
     if (line[0] == '#') {
@@ -154,12 +155,17 @@ geometry load_obj(std::string pFilename) {
       for (int i = 1; i < words.size(); i += 1) {
         std::vector<std::string> segments = string_split(words[i], "/");
         facePos.push_back(vertPos[std::stoi(segments[0]) - 1]);
-        if (segments[1].size() > 0) {
+        if (segments.size() > 1 && segments[1].size() > 0) {
           faceTexCoords.push_back(vertTexCoords[std::stoi(segments[1]) - 1]);
         } else {
           faceTexCoords.push_back({});
         }
-        faceNormals.push_back(vertNormals[std::stoi(segments[2]) - 1]);
+        if (segments.size() > 2 && segments[2].size() > 0) {
+          hasNormals = true;
+          faceNormals.push_back(vertNormals[std::stoi(segments[2]) - 1]);
+        } else {
+          faceNormals.push_back({});
+        }
       }
       for (int i = 3; i <= words.size() - 1; i += 1) {
         faces.push_back(startIndex);
@@ -182,6 +188,9 @@ geometry load_obj(std::string pFilename) {
   geom.mNormals = faceNormals;
   geom.mTexCoords = faceTexCoords;
   geom.mType = GL_TRIANGLES;
+  if (!hasNormals)
+    calc_normals(geom);
+  calc_tangents(geom);
   return geom;
 }
 

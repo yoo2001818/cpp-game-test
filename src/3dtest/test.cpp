@@ -161,7 +161,7 @@ void world::init() {
   this->mAngle = 0.0;
   this->mAngleY = 0.0;
   auto &entity_store = this->get_entity_store();
-  auto teapot = std::make_shared<geometry>(load_obj("res/teapot2.obj"));
+  auto teapot = std::make_shared<geometry>(load_obj("res/teapot.obj"));
   for (int i = 0; i < 10; i += 1) {
     auto &cube = entity_store.create_entity();
     cube.name = "cube";
