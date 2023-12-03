@@ -187,6 +187,14 @@ void world::init() {
     camera.camera->far = 100.0f;
     camera.camera->fov = glm::radians(40.0f);
   }
+  {
+    auto &light = entity_store.create_entity();
+    light.name = "light";
+    light.transform = std::make_unique<transform>();
+    light.transform->translate(glm::vec3(0.0, 0.0, 0.0));
+    light.light = std::make_unique<::light>();
+    light.light->mColor = glm::vec3(1.0);
+  }
 }
 
 void world::update() {

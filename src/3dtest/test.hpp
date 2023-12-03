@@ -38,7 +38,7 @@ struct mesh {
 };
 class light {
 public:
-  int placeholder;
+  glm::vec3 mColor;
 };
 class camera {
 public:
