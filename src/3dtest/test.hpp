@@ -7,6 +7,7 @@
 #include <optional>
 #include <stack>
 
+class entity_store;
 class transform {
   // NOTE: We don't support any hierarchy yet
 public:
@@ -24,12 +25,16 @@ public:
 private:
   glm::mat4 mMatrix;
 };
+struct light_block {
+  glm::vec3 mPosition;
+  glm::vec3 mColor;
+};
 class material {
 public:
   unsigned int mVertexShaderId = -1;
   unsigned int mFragmentShaderId = -1;
   unsigned int mProgramId = -1;
-  void prepare();
+  void prepare(const std::vector<light_block> &pLights);
   void dispose();
 };
 struct mesh {
@@ -54,7 +59,6 @@ struct entity_id {
 
   auto operator<=>(const entity_id &) const = default;
 };
-class entity_store;
 class entity {
 private:
   entity_id mId;

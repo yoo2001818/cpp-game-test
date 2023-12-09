@@ -42,7 +42,7 @@ void transform::reset() { this->mMatrix = glm::mat4(1.0); }
 glm::mat4 &transform::getMatrix() { return this->mMatrix; }
 glm::mat4 transform::getInverseMatrix() { return glm::inverse(this->mMatrix); }
 
-void material::prepare() {
+void material::prepare(const std::vector<light_block> &pLights) {
   if (this->mProgramId == -1) {
     auto vs = glCreateShader(GL_VERTEX_SHADER);
     // FIXME
@@ -85,6 +85,7 @@ void material::prepare() {
     glDeleteShader(fs);
   }
   glUseProgram(this->mProgramId);
+  // Upload uniforms
 }
 void material::dispose() {
   if (this->mProgramId != -1) {
@@ -235,13 +236,23 @@ void world::render() {
   if (camera == nullptr) {
     return;
   }
+  std::vector<light_block> lightBlocks;
+  for (auto it = entity_store.begin(); it != entity_store.end(); it++) {
+    auto &entity = *it;
+    if (entity.light != nullptr && entity.transform != nullptr) {
+      light_block block;
+      block.mColor = entity.light->mColor;
+      block.mPosition = glm::vec3(entity.transform->getMatrix()[3]);
+      lightBlocks.push_back(block);
+    }
+  }
   for (auto it = entity_store.begin(); it != entity_store.end(); it++) {
     auto &entity = *it;
     if (entity.mesh != nullptr && entity.transform != nullptr) {
       for (int i = 0; i < entity.mesh->geometries.size(); i++) {
         auto &material = entity.mesh->materials[i];
         auto &geometry = entity.mesh->geometries[i];
-        material->prepare();
+        material->prepare(lightBlocks);
         glUniformMatrix4fv(glGetUniformLocation(material->mProgramId, "uModel"),
                            1, false,
                            glm::value_ptr(entity.transform->getMatrix()));
