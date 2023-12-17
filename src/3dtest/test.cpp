@@ -42,10 +42,40 @@ void transform::reset() { this->mMatrix = glm::mat4(1.0); }
 glm::mat4 &transform::getMatrix() { return this->mMatrix; }
 glm::mat4 transform::getInverseMatrix() { return glm::inverse(this->mMatrix); }
 
-void material::prepare(const std::vector<light_block> &pLights) {
+void material_shader::prepare() {
   if (this->mProgramId == -1) {
+    auto vsSource = this->mVertexShader.data();
     auto vs = glCreateShader(GL_VERTEX_SHADER);
-    // FIXME
+    glShaderSource(vs, 1, &vsSource, NULL);
+    glCompileShader(vs);
+
+    auto fsSource = this->mFragmentShader.data();
+    auto fs = glCreateShader(GL_FRAGMENT_SHADER);
+    glShaderSource(fs, 1, &fsSource, NULL);
+    glCompileShader(fs);
+
+    this->mProgramId = glCreateProgram();
+    glAttachShader(this->mProgramId, vs);
+    glAttachShader(this->mProgramId, fs);
+    glLinkProgram(this->mProgramId);
+
+    glDeleteShader(vs);
+    glDeleteShader(fs);
+  }
+  glUseProgram(this->mProgramId);
+}
+
+void material_shader::dispose() {
+  if (this->mProgramId != -1) {
+    glDeleteProgram(this->mProgramId);
+    this->mProgramId = -1;
+  }
+}
+
+void material::prepare(const std::vector<light_block> &pLights) {
+  auto match = this->mShaders.find(pLights.size());
+  if (match == this->mShaders.end()) {
+    material_shader shader;
     const char *vsSource = "#version 330 core\n"
                            "layout (location = 0) in vec3 aPosition;\n"
                            "layout (location = 1) in vec2 aTexCoord;\n"
@@ -62,10 +92,6 @@ void material::prepare(const std::vector<light_block> &pLights) {
                            "   vColor = normalize((uView * uModel * "
                            "vec4(aNormal, 0.0)).xyz) * 0.5 + 0.5;\n"
                            "}\0";
-    glShaderSource(vs, 1, &vsSource, NULL);
-    glCompileShader(vs);
-
-    auto fs = glCreateShader(GL_FRAGMENT_SHADER);
     const char *fsSource = "#version 330 core\n"
                            "in vec3 vColor;\n"
                            "out vec4 FragColor;\n"
@@ -73,25 +99,23 @@ void material::prepare(const std::vector<light_block> &pLights) {
                            "{\n"
                            "    FragColor = vec4(vColor, 1.0f);\n"
                            "}\0";
-    glShaderSource(fs, 1, &fsSource, NULL);
-    glCompileShader(fs);
-
-    this->mProgramId = glCreateProgram();
-    glAttachShader(this->mProgramId, vs);
-    glAttachShader(this->mProgramId, fs);
-    glLinkProgram(this->mProgramId);
-
-    glDeleteShader(vs);
-    glDeleteShader(fs);
+    shader.mVertexShader = vsSource;
+    shader.mFragmentShader = fsSource;
+    auto [iter, created] = this->mShaders.insert({pLights.size(), shader});
+    iter->second.prepare();
+    this->mCurrentProgramId = iter->second.mProgramId;
+  } else {
+    match->second.prepare();
+    this->mCurrentProgramId = match->second.mProgramId;
   }
-  glUseProgram(this->mProgramId);
-  // Upload uniforms
+  // Upload uniforms according to parameters
 }
 void material::dispose() {
-  if (this->mProgramId != -1) {
-    glDeleteProgram(this->mProgramId);
-    this->mProgramId = -1;
+  for (auto iter = this->mShaders.begin(); iter != this->mShaders.end();
+       iter++) {
+    iter->second.dispose();
   }
+  this->mShaders.clear();
 }
 
 glm::mat4 camera::getProjection(float pAspect) {
@@ -253,14 +277,15 @@ void world::render() {
         auto &material = entity.mesh->materials[i];
         auto &geometry = entity.mesh->geometries[i];
         material->prepare(lightBlocks);
-        glUniformMatrix4fv(glGetUniformLocation(material->mProgramId, "uModel"),
-                           1, false,
-                           glm::value_ptr(entity.transform->getMatrix()));
         glUniformMatrix4fv(
-            glGetUniformLocation(material->mProgramId, "uView"), 1, false,
-            glm::value_ptr(camera->transform->getInverseMatrix()));
+            glGetUniformLocation(material->mCurrentProgramId, "uModel"), 1,
+            false, glm::value_ptr(entity.transform->getMatrix()));
         glUniformMatrix4fv(
-            glGetUniformLocation(material->mProgramId, "uProjection"), 1, false,
+            glGetUniformLocation(material->mCurrentProgramId, "uView"), 1,
+            false, glm::value_ptr(camera->transform->getInverseMatrix()));
+        glUniformMatrix4fv(
+            glGetUniformLocation(material->mCurrentProgramId, "uProjection"), 1,
+            false,
             glm::value_ptr(camera->camera->getProjection((float)this->mWidth /
                                                          this->mHeight)));
         geometry->render();

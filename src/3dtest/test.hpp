@@ -42,6 +42,7 @@ public:
 class material {
 public:
   std::map<int, material_shader> mShaders;
+  unsigned int mCurrentProgramId;
   void prepare(const std::vector<light_block> &pLights);
   void dispose();
 };
