@@ -15,6 +15,7 @@
 #include <iostream>
 #include <memory>
 #include <numbers>
+#include <sstream>
 
 void transform::translate(glm::vec3 pPosition) {
   this->mMatrix = glm::translate(this->mMatrix, pPosition);
@@ -76,31 +77,33 @@ void material::prepare(const std::vector<light_block> &pLights) {
   auto match = this->mShaders.find(pLights.size());
   if (match == this->mShaders.end()) {
     material_shader shader;
-    const char *vsSource = "#version 330 core\n"
-                           "layout (location = 0) in vec3 aPosition;\n"
-                           "layout (location = 1) in vec2 aTexCoord;\n"
-                           "layout (location = 2) in vec3 aNormal;\n"
-                           "layout (location = 3) in vec3 aTangent;\n"
-                           "out vec3 vColor;\n"
-                           "uniform mat4 uModel;\n"
-                           "uniform mat4 uView;\n"
-                           "uniform mat4 uProjection;\n"
-                           "void main()\n"
-                           "{\n"
-                           "   gl_Position = uProjection * uView * uModel * "
-                           "vec4(aPosition, 1.0);\n"
-                           "   vColor = normalize((uView * uModel * "
-                           "vec4(aNormal, 0.0)).xyz) * 0.5 + 0.5;\n"
-                           "}\0";
-    const char *fsSource = "#version 330 core\n"
-                           "in vec3 vColor;\n"
-                           "out vec4 FragColor;\n"
-                           "void main()\n"
-                           "{\n"
-                           "    FragColor = vec4(vColor, 1.0f);\n"
-                           "}\0";
-    shader.mVertexShader = vsSource;
-    shader.mFragmentShader = fsSource;
+    std::stringstream vsStream;
+    vsStream << "#version 330 core\n";
+    vsStream << "layout (location = 0) in vec3 aPosition;\n";
+    vsStream << "layout (location = 1) in vec2 aTexCoord;\n";
+    vsStream << "layout (location = 2) in vec3 aNormal;\n";
+    vsStream << "layout (location = 3) in vec3 aTangent;\n";
+    vsStream << "out vec3 vColor;\n";
+    vsStream << "uniform mat4 uModel;\n";
+    vsStream << "uniform mat4 uView;\n";
+    vsStream << "uniform mat4 uProjection;\n";
+    vsStream << "void main()\n";
+    vsStream << "{\n";
+    vsStream << "   gl_Position = uProjection * uView * uModel * ";
+    vsStream << "vec4(aPosition, 1.0);\n";
+    vsStream << "   vColor = normalize((uView * uModel * ";
+    vsStream << "vec4(aNormal, 0.0)).xyz) * 0.5 + 0.5;\n";
+    vsStream << "}\n";
+    std::stringstream fsStream;
+    fsStream << "#version 330 core\n";
+    fsStream << "in vec3 vColor;\n";
+    fsStream << "out vec4 FragColor;\n";
+    fsStream << "void main()\n";
+    fsStream << "{\n";
+    fsStream << "    FragColor = vec4(vColor, 1.0f);\n";
+    fsStream << "}\n";
+    shader.mVertexShader = vsStream.str();
+    shader.mFragmentShader = fsStream.str();
     auto [iter, created] = this->mShaders.insert({pLights.size(), shader});
     iter->second.prepare();
     this->mCurrentProgramId = iter->second.mProgramId;
