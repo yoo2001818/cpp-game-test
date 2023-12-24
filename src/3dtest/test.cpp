@@ -98,6 +98,11 @@ void material::prepare(const std::vector<light_block> &pLights) {
     fsStream << "#version 330 core\n";
     fsStream << "in vec3 vColor;\n";
     fsStream << "out vec4 FragColor;\n";
+    fsStream << "uniform vec4 uLightPositions[" << pLights.size() << "];\n";
+    fsStream << "uniform vec4 uLightColors[" << pLights.size() << "];\n";
+    fsStream << "uniform vec3 uColor;\n";
+    fsStream << "uniform float uRoughness;\n";
+    fsStream << "uniform float uMetalic;\n";
     fsStream << "void main()\n";
     fsStream << "{\n";
     fsStream << "    FragColor = vec4(vColor, 1.0f);\n";
