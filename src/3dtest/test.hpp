@@ -28,6 +28,7 @@ private:
 struct light_block {
   glm::vec3 mPosition;
   glm::vec3 mColor;
+  float mAttenuation;
 };
 class material_shader {
 public:

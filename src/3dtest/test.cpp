@@ -99,7 +99,7 @@ void material::prepare(const std::vector<light_block> &pLights) {
     fsStream << "in vec3 vColor;\n";
     fsStream << "out vec4 FragColor;\n";
     fsStream << "uniform vec4 uLightPositions[" << pLights.size() << "];\n";
-    fsStream << "uniform vec4 uLightColors[" << pLights.size() << "];\n";
+    fsStream << "uniform vec3 uLightColors[" << pLights.size() << "];\n";
     fsStream << "uniform vec3 uColor;\n";
     fsStream << "uniform float uRoughness;\n";
     fsStream << "uniform float uMetalic;\n";
@@ -117,6 +117,27 @@ void material::prepare(const std::vector<light_block> &pLights) {
     this->mCurrentProgramId = match->second.mProgramId;
   }
   // Upload uniforms according to parameters
+  glm::vec3 color(0.8, 0.8, 0.8);
+  float roughness = 0.5;
+  float metalic = 0.0;
+  glUniform3fv(glGetUniformLocation(this->mCurrentProgramId, "uColor"), 1,
+               glm::value_ptr(color));
+  glUniform1fv(glGetUniformLocation(this->mCurrentProgramId, "uRoughness"), 1,
+               &roughness);
+  glUniform1fv(glGetUniformLocation(this->mCurrentProgramId, "uMetalic"), 1,
+               &metalic);
+  int i = 0;
+  for (auto iter = pLights.begin(); iter != pLights.end(); iter++) {
+    auto &light = *iter;
+    glm::vec4 position(light.mPosition, light.mAttenuation);
+    glUniform4fv(
+        glGetUniformLocation(this->mCurrentProgramId, "uLightPositions") + i, 1,
+        glm::value_ptr(position));
+    glUniform3fv(glGetUniformLocation(this->mCurrentProgramId, "uLightColors") +
+                     i,
+                 1, glm::value_ptr(light.mColor));
+    i += 1;
+  }
 }
 void material::dispose() {
   for (auto iter = this->mShaders.begin(); iter != this->mShaders.end();
