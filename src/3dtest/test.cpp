@@ -83,7 +83,8 @@ void material::prepare(const std::vector<light_block> &pLights) {
     vsStream << "layout (location = 1) in vec2 aTexCoord;\n";
     vsStream << "layout (location = 2) in vec3 aNormal;\n";
     vsStream << "layout (location = 3) in vec3 aTangent;\n";
-    vsStream << "out vec3 vColor;\n";
+    vsStream << "out vec3 vPosition;\n";
+    vsStream << "out vec3 vNormal;\n";
     vsStream << "uniform mat4 uModel;\n";
     vsStream << "uniform mat4 uView;\n";
     vsStream << "uniform mat4 uProjection;\n";
@@ -91,12 +92,15 @@ void material::prepare(const std::vector<light_block> &pLights) {
     vsStream << "{\n";
     vsStream << "   gl_Position = uProjection * uView * uModel * ";
     vsStream << "vec4(aPosition, 1.0);\n";
-    vsStream << "   vColor = normalize((uView * uModel * ";
-    vsStream << "vec4(aNormal, 0.0)).xyz) * 0.5 + 0.5;\n";
+    vsStream << "   vNormal = normalize((uView * uModel * ";
+    vsStream << "vec4(aNormal, 0.0)).xyz);\n";
+    vsStream << "   vPosition = (uView * uModel * ";
+    vsStream << "vec4(aPosition, 1.0)).xyz;\n";
     vsStream << "}\n";
     std::stringstream fsStream;
     fsStream << "#version 330 core\n";
-    fsStream << "in vec3 vColor;\n";
+    fsStream << "in vec3 vPosition;\n";
+    fsStream << "in vec3 vNormal;\n";
     fsStream << "out vec4 FragColor;\n";
     fsStream << "uniform vec4 uLightPositions[" << pLights.size() << "];\n";
     fsStream << "uniform vec3 uLightColors[" << pLights.size() << "];\n";
