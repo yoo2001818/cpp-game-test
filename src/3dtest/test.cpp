@@ -109,7 +109,7 @@ void material::prepare(const std::vector<light_block> &pLights) {
     fsStream << "uniform float uMetalic;\n";
     fsStream << "void main()\n";
     fsStream << "{\n";
-    fsStream << "    FragColor = vec4(vColor, 1.0f);\n";
+    fsStream << "    FragColor = vec4(vNormal * 0.5 + 0.5, 1.0f);\n";
     fsStream << "}\n";
     shader.mVertexShader = vsStream.str();
     shader.mFragmentShader = fsStream.str();
