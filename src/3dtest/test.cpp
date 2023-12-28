@@ -45,20 +45,40 @@ glm::mat4 transform::getInverseMatrix() { return glm::inverse(this->mMatrix); }
 
 void material_shader::prepare() {
   if (this->mProgramId == -1) {
+    int success;
+    char infoLog[512];
     auto vsSource = this->mVertexShader.data();
     auto vs = glCreateShader(GL_VERTEX_SHADER);
     glShaderSource(vs, 1, &vsSource, NULL);
     glCompileShader(vs);
+    glGetShaderiv(vs, GL_COMPILE_STATUS, &success);
+    if (!success) {
+      glGetShaderInfoLog(vs, 512, NULL, infoLog);
+      std::cout << "ERROR::SHADER::VERTEX::COMPILATION_FAILED\n"
+                << infoLog << std::endl;
+    };
 
     auto fsSource = this->mFragmentShader.data();
     auto fs = glCreateShader(GL_FRAGMENT_SHADER);
     glShaderSource(fs, 1, &fsSource, NULL);
     glCompileShader(fs);
+    glGetShaderiv(fs, GL_COMPILE_STATUS, &success);
+    if (!success) {
+      glGetShaderInfoLog(fs, 512, NULL, infoLog);
+      std::cout << "ERROR::SHADER::FRAGMENT::COMPILATION_FAILED\n"
+                << infoLog << std::endl;
+    };
 
     this->mProgramId = glCreateProgram();
     glAttachShader(this->mProgramId, vs);
     glAttachShader(this->mProgramId, fs);
     glLinkProgram(this->mProgramId);
+    glGetProgramiv(this->mProgramId, GL_LINK_STATUS, &success);
+    if (!success) {
+      glGetProgramInfoLog(this->mProgramId, 512, NULL, infoLog);
+      std::cout << "ERROR::SHADER::PROGRAM::LINKING_FAILED\n"
+                << infoLog << std::endl;
+    }
 
     glDeleteShader(vs);
     glDeleteShader(fs);
@@ -107,9 +127,26 @@ void material::prepare(const std::vector<light_block> &pLights) {
     fsStream << "uniform vec3 uColor;\n";
     fsStream << "uniform float uRoughness;\n";
     fsStream << "uniform float uMetalic;\n";
+    fsStream << "uniform mat4 uView;\n";
     fsStream << "void main()\n";
     fsStream << "{\n";
-    fsStream << "    FragColor = vec4(vNormal * 0.5 + 0.5, 1.0f);\n";
+    fsStream << "    vec3 result = vec3(0.0);\n";
+    fsStream << "    vec3 ambient = vec3(0.1);\n";
+    fsStream << "    result += ambient * uColor;\n";
+    fsStream << "    vec3 normal = normalize(vNormal);\n";
+    fsStream << "    for (int i = 0; i < " << pLights.size() << "; i += 1) {\n";
+    fsStream << "        vec3 lightPos = (uView * vec4(uLightPositions[i].xyz, "
+                "1.0)).xyz;\n";
+    fsStream << "        vec3 lightDir = normalize(lightPos - vPosition);\n";
+    fsStream << "        result += max(dot(vNormal, lightDir), 0.0) * "
+                "uLightColors[i] * uColor;\n";
+    fsStream << "        vec3 viewDir = normalize(-vPosition);\n";
+    fsStream << "        vec3 reflectDir = reflect(-lightDir, normal);\n";
+    fsStream << "        float spec = pow(max(dot(viewDir, reflectDir), 0.0), "
+                "32);\n";
+    fsStream << "        result += 0.5 * spec * uLightColors[i];\n";
+    fsStream << "    }\n";
+    fsStream << "    FragColor = vec4(result, 1.0f);\n";
     fsStream << "}\n";
     shader.mVertexShader = vsStream.str();
     shader.mFragmentShader = fsStream.str();
