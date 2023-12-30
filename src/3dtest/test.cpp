@@ -2,6 +2,7 @@
 #include "3dtest/geometry.hpp"
 #include <GL/glew.h>
 #include <cmath>
+#include <fstream>
 #include <functional>
 #include <glm/ext/matrix_clip_space.hpp>
 #include <glm/ext/matrix_transform.hpp>
@@ -97,57 +98,12 @@ void material::prepare(const std::vector<light_block> &pLights) {
   auto match = this->mShaders.find(pLights.size());
   if (match == this->mShaders.end()) {
     material_shader shader;
+    std::ifstream vsFile("res/phong.vert");
     std::stringstream vsStream;
-    vsStream << "#version 330 core\n";
-    vsStream << "layout (location = 0) in vec3 aPosition;\n";
-    vsStream << "layout (location = 1) in vec2 aTexCoord;\n";
-    vsStream << "layout (location = 2) in vec3 aNormal;\n";
-    vsStream << "layout (location = 3) in vec3 aTangent;\n";
-    vsStream << "out vec3 vPosition;\n";
-    vsStream << "out vec3 vNormal;\n";
-    vsStream << "uniform mat4 uModel;\n";
-    vsStream << "uniform mat4 uView;\n";
-    vsStream << "uniform mat4 uProjection;\n";
-    vsStream << "void main()\n";
-    vsStream << "{\n";
-    vsStream << "   gl_Position = uProjection * uView * uModel * ";
-    vsStream << "vec4(aPosition, 1.0);\n";
-    vsStream << "   vNormal = normalize((uView * uModel * ";
-    vsStream << "vec4(aNormal, 0.0)).xyz);\n";
-    vsStream << "   vPosition = (uView * uModel * ";
-    vsStream << "vec4(aPosition, 1.0)).xyz;\n";
-    vsStream << "}\n";
+    vsStream << vsFile.rdbuf();
+    std::ifstream fsFile("res/phong.frag");
     std::stringstream fsStream;
-    fsStream << "#version 330 core\n";
-    fsStream << "in vec3 vPosition;\n";
-    fsStream << "in vec3 vNormal;\n";
-    fsStream << "out vec4 FragColor;\n";
-    fsStream << "uniform vec4 uLightPositions[" << pLights.size() << "];\n";
-    fsStream << "uniform vec3 uLightColors[" << pLights.size() << "];\n";
-    fsStream << "uniform vec3 uColor;\n";
-    fsStream << "uniform float uRoughness;\n";
-    fsStream << "uniform float uMetalic;\n";
-    fsStream << "uniform mat4 uView;\n";
-    fsStream << "void main()\n";
-    fsStream << "{\n";
-    fsStream << "    vec3 result = vec3(0.0);\n";
-    fsStream << "    vec3 ambient = vec3(0.1);\n";
-    fsStream << "    result += ambient * uColor;\n";
-    fsStream << "    vec3 normal = normalize(vNormal);\n";
-    fsStream << "    for (int i = 0; i < " << pLights.size() << "; i += 1) {\n";
-    fsStream << "        vec3 lightPos = (uView * vec4(uLightPositions[i].xyz, "
-                "1.0)).xyz;\n";
-    fsStream << "        vec3 lightDir = normalize(lightPos - vPosition);\n";
-    fsStream << "        result += max(dot(vNormal, lightDir), 0.0) * "
-                "uLightColors[i] * uColor;\n";
-    fsStream << "        vec3 viewDir = normalize(-vPosition);\n";
-    fsStream << "        vec3 reflectDir = reflect(-lightDir, normal);\n";
-    fsStream << "        float spec = pow(max(dot(viewDir, reflectDir), 0.0), "
-                "32);\n";
-    fsStream << "        result += 0.5 * spec * uLightColors[i];\n";
-    fsStream << "    }\n";
-    fsStream << "    FragColor = vec4(result, 1.0f);\n";
-    fsStream << "}\n";
+    fsStream << fsFile.rdbuf();
     shader.mVertexShader = vsStream.str();
     shader.mFragmentShader = fsStream.str();
     auto [iter, created] = this->mShaders.insert({pLights.size(), shader});
